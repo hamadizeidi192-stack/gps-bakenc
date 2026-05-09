@@ -1,0 +1,13 @@
+services:
+  - type: web_service
+    name: smart-glasses-backend
+    env: python
+    region: oregon
+    plan: free
+    root: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: MONGO_URI
+        sync: false
+        value: ""
