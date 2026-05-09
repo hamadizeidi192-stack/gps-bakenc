@@ -19,17 +19,13 @@ function App() {
   const [notifications, setNotifications] = useState([]);
   const [countdown, setCountdown] = useState(POLL_INTERVAL / 1000);
 
-  const addNotification = (message, type = 'info') => {
+  const addNotification = (message, type = 'info') =>
     setNotifications(prev => [...prev, { id: Date.now(), message, type }]);
-  };
-  const removeNotification = id => setNotifications(prev => prev.filter(n => n.id !== id));
+  const removeNotification = id =>
+    setNotifications(prev => prev.filter(n => n.id !== id));
 
   const handleLocationUpdate = (data) => {
-    setLocationData(prev => {
-      if (data.isOnline && !prev.isOnline) addNotification('Device connected — streaming live', 'success');
-      else if (!data.isOnline && prev.isOnline) addNotification('Device went offline', 'error');
-      return data;
-    });
+    setLocationData(data);
     setLoading(false);
     setCountdown(POLL_INTERVAL / 1000);
   };
@@ -40,10 +36,9 @@ function App() {
     try {
       const data = await fetchGPSLocation();
       handleLocationUpdate(data);
-      if (data.isOnline) addNotification('Data synced successfully', 'success');
-      else addNotification('Device not responding', 'error');
+      addNotification('Data synced', 'success');
     } catch {
-      addNotification('Sync failed — connection error', 'error');
+      addNotification('Sync failed', 'error');
       setLoading(false);
     }
   };
@@ -51,47 +46,41 @@ function App() {
   useEffect(() => {
     setLoading(true);
     fetchGPSLocation().then(handleLocationUpdate);
-    addNotification('Dashboard ready', 'info');
     const id = startLocationPolling(handleLocationUpdate, POLL_INTERVAL);
     return () => stopLocationPolling(id);
   }, []);
 
-  // Countdown tick
   useEffect(() => {
-    const tick = setInterval(() => {
-      setCountdown(prev => (prev > 0 ? prev - 1 : POLL_INTERVAL / 1000));
-    }, 1000);
+    const tick = setInterval(() =>
+      setCountdown(p => p > 0 ? p - 1 : POLL_INTERVAL / 1000), 1000);
     return () => clearInterval(tick);
   }, []);
 
-  // Ticker data
-  const tickerItems = [
+  // Ticker items
+  const items = [
     `LAT ${locationData.latitude?.toFixed(5) ?? '—'}`,
     `LNG ${locationData.longitude?.toFixed(5) ?? '—'}`,
     `BATT ${locationData.battery}%`,
     `NET ${locationData.wifi}`,
-    `STATUS ${locationData.isOnline ? 'ONLINE' : 'OFFLINE'}`,
-    `SYNC IN ${countdown}s`,
+    `${locationData.isOnline ? 'ONLINE' : 'OFFLINE'}`,
+    `SYNC ${countdown}s`,
   ];
-  const tickerStr = [...tickerItems, ...tickerItems].join('   ·   ');
+  const ticker = [...items, ...items, ...items].join('   ·   ');
 
   return (
-    <div style={{ background: '#080c14', minHeight: '100vh', position: 'relative' }}>
-      {/* Gradient mesh background */}
-      <div className="bg-mesh" />
+    <div style={{ background: '#0a0a0a', minHeight: '100vh' }}>
+      <div className="bg-ambient" />
 
-      {/* Bottom ticker */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 ticker-track py-1.5"
-        style={{ background: 'rgba(8,12,20,0.92)', borderTop: '1px solid rgba(255,255,255,0.06)' }}
-      >
-        <div className="ticker-content">{tickerStr}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{tickerStr}</div>
+      {/* Ticker */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 ticker-track py-1.5"
+        style={{ background: 'rgba(10,10,10,0.95)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+        <div className="ticker-content">{ticker}</div>
       </div>
 
-      <Navbar onMenuToggle={() => setSidebarOpen(o => !o)} isSidebarOpen={sidebarOpen} />
+      <Navbar onMenuToggle={() => setSidebarOpen(o => !o)} />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} isOnline={locationData.isOnline} />
 
-      <main className="lg:ml-56">
+      <main className="lg:ml-52">
         <Dashboard
           locationData={locationData}
           loading={loading}

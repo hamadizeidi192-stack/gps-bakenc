@@ -1,92 +1,39 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Zap, Wifi, Clock, Signal, AlertTriangle } from 'lucide-react';
+import { MapPin, Zap, Wifi, Clock, Signal, TrendingUp } from 'lucide-react';
 
-const cardTheme = {
-  success: {
-    icon: 'rgba(52,211,153,0.15)',
-    iconColor: '#34d399',
-    value: '#e2e8f0',
-    pill: 'pill-green',
-    pillLabel: 'Good',
-    border: 'rgba(52,211,153,0.12)',
-  },
-  warning: {
-    icon: 'rgba(251,146,60,0.15)',
-    iconColor: '#fb923c',
-    value: '#e2e8f0',
-    pill: 'pill-orange',
-    pillLabel: 'Warning',
-    border: 'rgba(251,146,60,0.15)',
-  },
-  error: {
-    icon: 'rgba(248,113,113,0.15)',
-    iconColor: '#f87171',
-    value: 'rgba(255,255,255,0.4)',
-    pill: 'pill-red',
-    pillLabel: 'No Data',
-    border: 'rgba(248,113,113,0.12)',
-  },
-  normal: {
-    icon: 'rgba(167,139,250,0.12)',
-    iconColor: '#a78bfa',
-    value: '#e2e8f0',
-    pill: 'pill-purple',
-    pillLabel: 'Active',
-    border: 'rgba(255,255,255,0.07)',
-  },
+const theme = {
+  success: { iconBg: 'rgba(34,197,94,0.1)',   iconColor: '#22c55e', pill: 'pill-green',  pillTxt: 'Active'  },
+  warning: { iconBg: 'rgba(249,115,22,0.12)',  iconColor: '#f97316', pill: 'pill-orange', pillTxt: 'Warning' },
+  error:   { iconBg: 'rgba(239,68,68,0.1)',    iconColor: '#ef4444', pill: 'pill-red',    pillTxt: 'No Data' },
+  normal:  { iconBg: 'rgba(255,255,255,0.06)', iconColor: 'rgba(255,255,255,0.5)', pill: 'pill-gray', pillTxt: '—' },
 };
 
 export const StatCard = ({ icon: Icon, label, value, unit = '', status = 'normal', loading = false, index = 0 }) => {
-  const t = cardTheme[status] || cardTheme.normal;
-
+  const t = theme[status] || theme.normal;
   return (
     <motion.div
-      initial={{ opacity: 0, y: 16 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay: index * 0.06 }}
-      className="card p-5 flex flex-col gap-4"
-      style={{ borderColor: t.border }}
+      transition={{ duration: 0.35, delay: index * 0.05 }}
+      className="card p-5"
     >
-      {/* Top row */}
-      <div className="flex items-center justify-between">
-        <div
-          className="w-10 h-10 rounded-xl flex items-center justify-center"
-          style={{ background: t.icon }}
-        >
-          <Icon size={18} style={{ color: t.iconColor }} />
+      <div className="flex items-start justify-between mb-4">
+        <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: t.iconBg }}>
+          <Icon size={16} style={{ color: t.iconColor }} />
         </div>
-        {!loading && (
-          <span className={`pill ${t.pill} text-[10px]`}>{t.pillLabel}</span>
-        )}
+        {!loading && <span className={`pill ${t.pill}`}>{t.pillTxt}</span>}
       </div>
-
-      {/* Value */}
-      <div>
-        <p className="text-xs font-medium text-white/40 mb-1 tracking-wide">{label}</p>
-        {loading ? (
-          <div className="flex items-center gap-2 h-8">
-            <div className="spinner" />
-            <span className="text-sm text-white/30">Loading…</span>
-          </div>
-        ) : (
-          <div className="flex items-baseline gap-1">
-            <span
-              className="text-2xl font-bold tracking-tight"
-              style={{ color: t.value }}
-            >
-              {value ?? '—'}
-            </span>
-            {unit && <span className="text-sm font-medium text-white/40">{unit}</span>}
-          </div>
-        )}
-      </div>
-
-      {/* Status bar */}
-      {status === 'warning' && !loading && (
-        <div className="flex items-center gap-1.5 text-xs" style={{ color: '#fb923c' }}>
-          <AlertTriangle size={11} />
-          <span>Low battery — charge soon</span>
+      <p className="text-xs font-medium text-white/40 mb-1">{label}</p>
+      {loading ? (
+        <div className="flex items-center gap-2 h-8">
+          <div className="spinner" />
+          <span className="text-sm text-white/25">Loading…</span>
+        </div>
+      ) : (
+        <div className="flex items-baseline gap-1">
+          <span className="text-xl font-bold text-white">{value ?? '—'}</span>
+          {unit && <span className="text-sm text-white/35 font-medium">{unit}</span>}
         </div>
       )}
     </motion.div>
@@ -101,30 +48,18 @@ export const StatusCardsGrid = ({ data, loading }) => {
     return 'success';
   };
 
-  const cards = [
-    { icon: MapPin,  label: 'Latitude',   value: data.latitude,   field: 'Latitude',  index: 0 },
-    { icon: MapPin,  label: 'Longitude',  value: data.longitude,  field: 'Longitude', index: 1 },
-    { icon: Zap,     label: 'Battery',    value: data.battery,    unit: '%', field: 'Battery', index: 2 },
-    { icon: Wifi,    label: 'Network',    value: data.wifi,       field: 'WiFi',      index: 3 },
-    { icon: Clock,   label: 'Last Sync',  value: data.lastUpdate, field: 'Time',      index: 4 },
-    { icon: Signal,  label: 'Status',     value: data.isOnline ? 'Online' : 'Offline', field: 'Status', index: 5 },
-  ];
-
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
-      {cards.map(c => (
-        <StatCard
-          key={c.label}
-          icon={c.icon}
-          label={c.label}
-          value={c.value}
-          unit={c.unit}
-          loading={loading}
-          index={c.index}
-          status={c.field === 'Status'
-            ? (data.isOnline ? 'success' : 'error')
-            : getStatus(c.field, c.value)
-          }
+      {[
+        { icon: MapPin,  label: 'Latitude',  value: data.latitude,  field: 'Latitude',  index: 0 },
+        { icon: MapPin,  label: 'Longitude', value: data.longitude, field: 'Longitude', index: 1 },
+        { icon: Zap,     label: 'Battery',   value: data.battery,   unit: '%', field: 'Battery', index: 2 },
+        { icon: Wifi,    label: 'Network',   value: data.wifi,      field: 'WiFi',      index: 3 },
+        { icon: Clock,   label: 'Last Sync', value: data.lastUpdate,field: 'Time',      index: 4 },
+        { icon: Signal,  label: 'Status',    value: data.isOnline ? 'Online' : 'Offline', field: 'Status', index: 5 },
+      ].map(c => (
+        <StatCard key={c.label} {...c} loading={loading}
+          status={c.field === 'Status' ? (data.isOnline ? 'success' : 'error') : getStatus(c.field, c.value)}
         />
       ))}
     </div>
