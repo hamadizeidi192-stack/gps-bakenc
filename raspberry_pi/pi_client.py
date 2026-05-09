@@ -6,7 +6,7 @@ import pynmea2
 
 # Replace this with the actual IP address of your backend server
 # If running on the same network, it might be something like "http://192.168.1.100:8000/location"
-BACKEND_URL = "http://127.0.0.1:8000/location" 
+BACKEND_URL = "https://gps-bakenc.onrender.com/location" 
 
 def get_gps_data():
     """

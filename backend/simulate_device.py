@@ -9,8 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configuration
-PORT = os.getenv("FLASK_PORT", 8000)
-API_URL = f"http://localhost:{PORT}/location"
+API_URL = "https://gps-bakenc.onrender.com/location"
 UPDATE_INTERVAL = 5 # seconds
 
 # Initial coordinates (Tunis)
