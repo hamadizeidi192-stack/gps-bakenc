@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet'
 import { motion } from 'framer-motion';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { Navigation, Focus } from 'lucide-react';
+import { Navigation, Focus, Activity } from 'lucide-react';
 
 const customMarker = L.divIcon({
   html: `

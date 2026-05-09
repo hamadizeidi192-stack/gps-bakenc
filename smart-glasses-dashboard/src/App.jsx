@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { fetchGPSLocation, startLocationPolling, stopLocationPolling } from './services/api';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
@@ -20,17 +20,20 @@ function App() {
   const [notifications, setNotifications] = useState([]);
   const [countdown, setCountdown] = useState(POLL_INTERVAL / 1000);
 
-  const addNotification = (message, type = 'info') =>
+  const addNotification = useCallback((message, type = 'info') => {
     setNotifications(prev => [...prev, { id: Date.now(), message, type }]);
-  const removeNotification = id =>
-    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
 
-  const handleLocationUpdate = (data) => {
+  const removeNotification = useCallback(id => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
+  const handleLocationUpdate = useCallback((data) => {
+    if (!data) return;
     setLocationData(data);
     if (data.latitude && data.longitude && data.isOnline) {
       setPathHistory(prev => {
         const last = prev[prev.length - 1];
-        // Only add if coordinate changed significantly to avoid duplicates
         if (!last || last[0] !== data.latitude || last[1] !== data.longitude) {
           return [...prev.slice(-19), [data.latitude, data.longitude]];
         }
@@ -39,45 +42,59 @@ function App() {
     }
     setLoading(false);
     setCountdown(POLL_INTERVAL / 1000);
-  };
+  }, []);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setLoading(true);
     setCountdown(POLL_INTERVAL / 1000);
     try {
       const data = await fetchGPSLocation();
       handleLocationUpdate(data);
-      addNotification('Data synchronized', 'success');
-    } catch {
-      addNotification('Sync failed', 'error');
+      addNotification('Telemetry updated', 'success');
+    } catch (err) {
+      addNotification('Update failed', 'error');
       setLoading(false);
+      console.error('Refresh error:', err);
     }
-  };
+  }, [handleLocationUpdate, addNotification]);
 
   useEffect(() => {
     setLoading(true);
-    fetchGPSLocation().then(handleLocationUpdate);
+    fetchGPSLocation()
+      .then(handleLocationUpdate)
+      .catch(err => {
+        console.error('Initial fetch error:', err);
+        setLoading(false);
+      });
+    
     const id = startLocationPolling(handleLocationUpdate, POLL_INTERVAL);
     return () => stopLocationPolling(id);
-  }, []);
+  }, [handleLocationUpdate]);
 
   useEffect(() => {
-    const tick = setInterval(() =>
-      setCountdown(p => p > 0 ? p - 1 : POLL_INTERVAL / 1000), 1000);
+    const tick = setInterval(() => {
+      setCountdown(p => (p > 0 ? p - 1 : POLL_INTERVAL / 1000));
+    }, 1000);
     return () => clearInterval(tick);
   }, []);
 
+  // Safe toFixed values
+  const lat = locationData?.latitude != null ? locationData.latitude.toFixed(5) : '—';
+  const lng = locationData?.longitude != null ? locationData.longitude.toFixed(5) : '—';
+  const batt = locationData?.battery ?? 0;
+  const status = locationData?.isOnline ? 'ONLINE' : 'OFFLINE';
+
   const items = [
-    `LAT ${locationData.latitude?.toFixed(5) ?? '—'}`,
-    `LNG ${locationData.longitude?.toFixed(5) ?? '—'}`,
-    `POWER ${locationData.battery}%`,
-    `SIGNAL ${locationData.isOnline ? 'ONLINE' : 'OFFLINE'}`,
-    `NEXT SYNC ${countdown}s`,
+    `LAT ${lat}`,
+    `LNG ${lng}`,
+    `BATT ${batt}%`,
+    `STATUS ${status}`,
+    `SYNC ${countdown}s`,
   ];
   const tickerStr = [...items, ...items, ...items].join('   ·   ');
 
   return (
-    <div className="min-h-screen relative selection:bg-blue-100 selection:text-blue-700">
+    <div className="min-h-screen relative selection:bg-blue-100 selection:text-blue-700 overflow-hidden">
       {/* Premium Background */}
       <div className="bg-dots" />
       <div className="bg-blob blob-1" />
@@ -89,7 +106,11 @@ function App() {
       </div>
 
       <Navbar onMenuToggle={() => setSidebarOpen(o => !o)} />
-      <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} isOnline={locationData.isOnline} />
+      <Sidebar 
+        isOpen={sidebarOpen} 
+        onClose={() => setSidebarOpen(false)} 
+        isOnline={locationData?.isOnline} 
+      />
 
       <main className="lg:ml-64 pt-6">
         <Dashboard
@@ -97,7 +118,7 @@ function App() {
           pathHistory={pathHistory}
           loading={loading}
           onRefresh={handleRefresh}
-          isOnline={locationData.isOnline}
+          isOnline={locationData?.isOnline}
           countdown={countdown}
           pollInterval={POLL_INTERVAL / 1000}
         />
