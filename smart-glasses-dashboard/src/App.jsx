@@ -36,9 +36,9 @@ function App() {
     try {
       const data = await fetchGPSLocation();
       handleLocationUpdate(data);
-      addNotification('Data synced', 'success');
+      addNotification('Dashboard updated', 'success');
     } catch {
-      addNotification('Sync failed', 'error');
+      addNotification('Update failed', 'error');
       setLoading(false);
     }
   };
@@ -56,31 +56,31 @@ function App() {
     return () => clearInterval(tick);
   }, []);
 
-  // Ticker items
   const items = [
     `LAT ${locationData.latitude?.toFixed(5) ?? '—'}`,
     `LNG ${locationData.longitude?.toFixed(5) ?? '—'}`,
-    `BATT ${locationData.battery}%`,
-    `NET ${locationData.wifi}`,
-    `${locationData.isOnline ? 'ONLINE' : 'OFFLINE'}`,
-    `SYNC ${countdown}s`,
+    `POWER ${locationData.battery}%`,
+    `SIGNAL ${locationData.isOnline ? 'ONLINE' : 'OFFLINE'}`,
+    `NEXT SYNC ${countdown}s`,
   ];
-  const ticker = [...items, ...items, ...items].join('   ·   ');
+  const tickerStr = [...items, ...items, ...items].join('   ·   ');
 
   return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh' }}>
-      <div className="bg-ambient" />
+    <div className="min-h-screen relative selection:bg-blue-100 selection:text-blue-700">
+      {/* Premium Background */}
+      <div className="bg-dots" />
+      <div className="bg-blob blob-1" />
+      <div className="bg-blob blob-2" />
 
-      {/* Ticker */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 ticker-track py-1.5"
-        style={{ background: 'rgba(10,10,10,0.95)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
-        <div className="ticker-content">{ticker}</div>
+      {/* Bottom Ticker */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 ticker-track">
+        <div className="ticker-content">{tickerStr}</div>
       </div>
 
       <Navbar onMenuToggle={() => setSidebarOpen(o => !o)} />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} isOnline={locationData.isOnline} />
 
-      <main className="lg:ml-52">
+      <main className="lg:ml-64 pt-6">
         <Dashboard
           locationData={locationData}
           loading={loading}

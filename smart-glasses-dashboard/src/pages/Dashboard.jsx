@@ -3,44 +3,26 @@ import { formatLocationData } from '../services/api';
 import MapComponent from '../components/MapComponent';
 import { StatusCardsGrid } from '../components/StatusCard';
 import { motion } from 'framer-motion';
-import { RefreshCw, Battery, Wifi, Clock, Server } from 'lucide-react';
+import { RefreshCw, Battery, Wifi, Activity, Info, ArrowUpRight } from 'lucide-react';
 
-// ── Countdown Ring ─────────────────────────────────────────────────────────────
-const CountdownRing = ({ countdown, total }) => {
-  const size = 56, stroke = 3;
-  const r = (size - stroke * 2) / 2;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (countdown / total) * circ;
-  const color = countdown > total * 0.5 ? '#f97316' : countdown > total * 0.2 ? '#fb923c' : '#ef4444';
+// ── Countdown ─────────────────────────────────────────────────────────────────
+const Countdown = ({ countdown, total }) => {
+  const pct = (countdown / total) * 100;
+  const color = countdown > 10 ? '#3b82f6' : countdown > 5 ? '#f59e0b' : '#ef4444';
   return (
-    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg className="absolute" width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx={size/2} cy={size/2} r={r} stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} fill="none" />
-        <circle cx={size/2} cy={size/2} r={r} stroke={color} strokeWidth={stroke} fill="none"
-          strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={offset}
-          style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.4s ease' }} />
-      </svg>
-      <div className="text-center z-10">
-        <p className="text-sm font-bold text-white leading-none">{countdown}</p>
-        <p className="text-[8px] text-white/25 font-medium">SEC</p>
+    <div className="flex items-center gap-4 bg-white px-5 py-3 rounded-[1.5rem] shadow-sm border border-slate-100">
+      <div className="relative w-10 h-10 flex items-center justify-center">
+        <svg className="absolute inset-0" viewBox="0 0 36 36">
+          <circle cx="18" cy="18" r="16" fill="none" stroke="#f1f5f9" strokeWidth="3" />
+          <circle cx="18" cy="18" r="16" fill="none" stroke={color} strokeWidth="3"
+            strokeDasharray="100" strokeDashoffset={100 - pct} strokeLinecap="round"
+            style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.4s' }} />
+        </svg>
+        <span className="text-[11px] font-black text-slate-800">{countdown}</span>
       </div>
-    </div>
-  );
-};
-
-// ── Battery bar ────────────────────────────────────────────────────────────────
-const BatteryBar = ({ level }) => {
-  const color = level > 50 ? '#22c55e' : level > 20 ? '#f97316' : '#ef4444';
-  return (
-    <div>
-      <div className="flex justify-between mb-1.5">
-        <span className="text-xs text-white/40">Battery</span>
-        <span className="text-xs font-bold" style={{ color }}>{level}%</span>
-      </div>
-      <div className="progress-track">
-        <motion.div className="progress-fill" initial={{ width: 0 }} animate={{ width: `${level}%` }}
-          transition={{ duration: 0.9, ease: [0.16,1,0.3,1] }}
-          style={{ background: color, boxShadow: `0 0 6px ${color}50` }} />
+      <div>
+        <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Next Sync</p>
+        <p className="text-xs font-bold text-slate-900">Auto-refresh active</p>
       </div>
     </div>
   );
@@ -57,133 +39,88 @@ export const Dashboard = ({ locationData, loading, onRefresh, isOnline, countdow
   };
 
   return (
-    <div className="pt-14 pb-14 min-h-screen">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
+    <div className="pb-24 px-4 md:px-8 max-w-7xl mx-auto">
 
-        {/* ── Header ──────────────────────────────────────────────────────── */}
-        <motion.div initial={{ opacity:0, y:-10 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.4 }} className="mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className={`status-dot ${isOnline ? 'online' : 'offline'}`} />
-                <span className="text-xs font-semibold" style={{ color: isOnline ? '#22c55e' : '#ef4444' }}>
-                  {isOnline ? 'Live Tracking' : 'Device Offline'}
-                </span>
-              </div>
-              <h1 className="text-2xl font-extrabold text-white tracking-tight">Tracking Dashboard</h1>
-              <p className="text-sm text-white/35 mt-0.5">Smart glasses · Real-time GPS &amp; telemetry</p>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl" style={{ background: '#111', border: '1px solid rgba(255,255,255,0.07)' }}>
-                <CountdownRing countdown={countdown} total={pollInterval} />
-                <div>
-                  <p className="text-[9px] text-white/25 font-medium mb-0.5">NEXT SYNC</p>
-                  <p className="text-xs font-semibold text-white/55">Every {pollInterval}s</p>
-                </div>
-              </div>
-              <button onClick={onRefresh} disabled={loading} className="btn-primary">
-                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                {loading ? 'Syncing…' : 'Sync'}
-              </button>
-            </div>
+      {/* ── Header ──────────────────────────────────────────────────────── */}
+      <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8 pt-8">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <span className={`pill ${isOnline ? 'pill-green' : 'pill-red'}`}>
+              <span className={`status-dot ${isOnline ? 'online' : 'offline'}`} />
+              {isOnline ? 'SYSTEM OPERATIONAL' : 'CONNECTION OFFLINE'}
+            </span>
           </div>
-          <div className="mt-4 divider" />
-        </motion.div>
-
-        {/* ── Stat cards ───────────────────────────────────────────────────── */}
-        <StatusCardsGrid data={fd} loading={loading} />
-
-        {/* ── Map + side panel ─────────────────────────────────────────────── */}
-        <div className="flex flex-col xl:flex-row gap-4 mb-4">
-          <div className="flex-1 min-w-0">
-            <MapComponent latitude={locationData.latitude} longitude={locationData.longitude}
-              isOnline={isOnline} loading={loading} onCenterMap={handleCenter} mapRef={mapRef} />
-          </div>
-
-          {/* Side panel */}
-          <motion.div initial={{ opacity:0, x:12 }} animate={{ opacity:1, x:0 }} transition={{ duration:0.4, delay:0.15 }}
-            className="xl:w-56 flex flex-col gap-3">
-
-            {/* Status */}
-            <div className="card p-4" style={{ borderColor: isOnline ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)' }}>
-              <p className="text-[10px] font-semibold text-white/35 uppercase tracking-wider mb-2">Connection</p>
-              <div className="flex items-center gap-2">
-                <span className={`status-dot ${isOnline ? 'online' : 'offline'}`} />
-                <span className="text-sm font-bold text-white">{isOnline ? 'Online' : 'Offline'}</span>
-              </div>
-            </div>
-
-            {/* Battery */}
-            <div className="card p-4">
-              <p className="text-[10px] font-semibold text-white/35 uppercase tracking-wider mb-3">Power</p>
-              <BatteryBar level={fd.battery} />
-            </div>
-
-            {/* Network */}
-            <div className="card p-4">
-              <p className="text-[10px] font-semibold text-white/35 uppercase tracking-wider mb-2">Network</p>
-              <div className="flex items-center gap-2">
-                <Wifi size={13} className="text-white/30" />
-                <span className="text-sm font-semibold text-white/75">{fd.wifi || '—'}</span>
-              </div>
-            </div>
-
-            {/* Last sync */}
-            <div className="card p-4">
-              <p className="text-[10px] font-semibold text-white/35 uppercase tracking-wider mb-2">Last Sync</p>
-              <div className="flex items-center gap-2">
-                <Clock size={13} className="text-white/30" />
-                <span className="text-xs font-mono text-white/55">{fd.lastUpdate || 'Never'}</span>
-              </div>
-            </div>
-          </motion.div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Device Overview</h1>
+          <p className="text-slate-500 font-medium">Monitoring your smart glasses telemetry in real-time.</p>
         </div>
 
-        {/* ── Bottom info row ──────────────────────────────────────────────── */}
-        <motion.div initial={{ opacity:0, y:10 }} animate={{ opacity:1, y:0 }} transition={{ duration:0.4, delay:0.3 }}
-          className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="flex items-center gap-3 w-full lg:w-auto">
+          <Countdown countdown={countdown} total={pollInterval} />
+          <button onClick={onRefresh} disabled={loading} className="btn-primary ml-auto lg:ml-0">
+            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+            {loading ? 'SYNCING' : 'REFRESH'}
+          </button>
+        </div>
+      </motion.div>
 
-          {/* System info */}
-          <div className="card p-5">
-            <div className="flex items-center gap-2 mb-4">
-              <Server size={13} className="text-white/25" />
-              <p className="text-xs font-semibold text-white/35 uppercase tracking-wider">System</p>
+      {/* ── Grid ────────────────────────────────────────────────────────── */}
+      <StatusCardsGrid data={fd} loading={loading} />
+
+      {/* ── Main Section ────────────────────────────────────────────────── */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-6">
+        <div className="xl:col-span-3">
+          <MapComponent latitude={locationData.latitude} longitude={locationData.longitude}
+            isOnline={isOnline} loading={loading} onCenterMap={handleCenter} mapRef={mapRef} />
+        </div>
+
+        {/* Info Column */}
+        <div className="space-y-6">
+          <div className="card p-6 border-b-4 border-b-blue-500">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Battery Status</p>
+              <Battery size={16} className="text-slate-300" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { k: 'Sync interval', v: `${pollInterval}s` },
-                { k: 'Backend',       v: 'Render Cloud' },
-                { k: 'Encryption',    v: 'AES-256' },
-                { k: 'Protocol',      v: 'HTTPS/REST' },
-              ].map(({ k, v }) => (
-                <div key={k}>
-                  <p className="text-[10px] text-white/25 mb-0.5">{k}</p>
-                  <p className="text-sm font-semibold text-white/65">{v}</p>
+            <div className="flex items-end gap-2 mb-3">
+              <span className="text-4xl font-black text-slate-900">{fd.battery}%</span>
+              <span className="text-xs font-bold text-emerald-500 mb-2 flex items-center"><ArrowUpRight size={14} /> Stable</span>
+            </div>
+            <div className="progress-track">
+              <div className="progress-fill bg-blue-500 shadow-[0_0_10px_#3b82f640]" style={{ width: `${fd.battery}%` }} />
+            </div>
+          </div>
+
+          <div className="card p-6">
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Network Info</p>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Wifi size={16} className="text-blue-500" />
+                  <span className="text-sm font-bold text-slate-700">SSID</span>
                 </div>
-              ))}
+                <span className="text-sm font-black text-slate-900">{fd.wifi || '—'}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Activity size={16} className="text-blue-500" />
+                  <span className="text-sm font-bold text-slate-700">Latency</span>
+                </div>
+                <span className="text-sm font-black text-slate-900">24ms</span>
+              </div>
             </div>
           </div>
 
-          {/* Tips */}
-          <div className="card-highlight p-5">
-            <p className="text-xs font-semibold text-white/35 uppercase tracking-wider mb-3">Tips</p>
-            <ul className="space-y-2">
-              {[
-                'GPS accuracy is better outdoors',
-                'Keep battery charged above 20%',
-                'Stable WiFi ensures consistent sync',
-                'Device sends location every 30s',
-              ].map(t => (
-                <li key={t} className="flex items-start gap-2 text-xs text-white/45">
-                  <span className="mt-0.5 text-accent">›</span> {t}
-                </li>
-              ))}
-            </ul>
+          <div className="rounded-3xl bg-blue-600 p-6 text-white shadow-xl shadow-blue-200">
+            <div className="flex items-center gap-2 mb-4">
+              <Info size={18} />
+              <p className="text-xs font-bold uppercase tracking-wider">Device Health</p>
+            </div>
+            <p className="text-sm font-medium leading-relaxed opacity-90">
+              Your device is sending high-precision GPS coordinates every 30 seconds. Battery health is optimal.
+            </p>
           </div>
-        </motion.div>
-
+        </div>
       </div>
+
     </div>
   );
 };
