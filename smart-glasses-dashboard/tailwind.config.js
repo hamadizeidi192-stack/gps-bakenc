@@ -6,6 +6,9 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Outfit', 'sans-serif'],
+      },
       colors: {
         dark: {
           50: '#f9fafb',

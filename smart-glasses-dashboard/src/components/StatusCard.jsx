@@ -8,24 +8,24 @@ import { Zap, Wifi, Clock, AlertCircle, MapPin } from 'lucide-react';
  */
 export const StatusCard = ({ icon: Icon, label, value, unit = '', status = 'normal', loading = false }) => {
   const statusColors = {
-    normal: 'border-dark-700',
-    warning: 'border-yellow-500/50',
-    error: 'border-red-500/50',
-    success: 'border-green-500/50',
+    normal: 'border-slate-100',
+    warning: 'border-amber-200 bg-amber-50/30',
+    error: 'border-rose-200 bg-rose-50/30',
+    success: 'border-emerald-200 bg-emerald-50/30',
   };
 
   const statusBgColors = {
-    normal: 'bg-dark-800/50',
-    warning: 'bg-yellow-500/10',
-    error: 'bg-red-500/10',
-    success: 'bg-green-500/10',
+    normal: 'bg-indigo-50',
+    warning: 'bg-amber-100',
+    error: 'bg-rose-100',
+    success: 'bg-emerald-100',
   };
 
   const statusIconColors = {
-    normal: 'text-blue-400',
-    warning: 'text-yellow-400',
-    error: 'text-red-400',
-    success: 'text-green-400',
+    normal: 'text-indigo-600',
+    warning: 'text-amber-600',
+    error: 'text-rose-600',
+    success: 'text-emerald-600',
   };
 
   return (
@@ -33,34 +33,33 @@ export const StatusCard = ({ icon: Icon, label, value, unit = '', status = 'norm
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      whileHover={{ scale: 1.02 }}
-      className={`glass-effect p-6 rounded-xl border-2 ${statusColors[status]} transition-smooth card-hover`}
+      className={`glass-effect p-6 border ${statusColors[status]} transition-smooth card-hover group`}
     >
-      <div className={`${statusBgColors[status]} w-12 h-12 rounded-lg flex items-center justify-center mb-4`}>
+      <div className={`${statusBgColors[status]} w-12 h-12 rounded-xl flex items-center justify-center mb-4 transition-smooth group-hover:scale-110 group-hover:rotate-3`}>
         <Icon size={24} className={statusIconColors[status]} />
       </div>
 
-      <p className="text-sm font-medium text-gray-400 mb-2">{label}</p>
+      <p className="text-sm font-semibold text-slate-500 mb-1 tracking-wide uppercase">{label}</p>
 
       {loading ? (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 mt-2">
           <div className="spinner" />
-          <span className="text-lg font-bold text-gray-300">Loading...</span>
+          <span className="text-lg font-bold text-slate-400">Loading...</span>
         </div>
       ) : (
         <div className="flex items-baseline gap-2">
-          <span className="text-3xl font-bold text-white">{value}</span>
-          {unit && <span className="text-sm text-gray-400">{unit}</span>}
+          <span className="text-3xl font-extrabold text-slate-800 tracking-tight">{value}</span>
+          {unit && <span className="text-sm font-bold text-slate-400">{unit}</span>}
         </div>
       )}
 
       {status !== 'normal' && (
-        <div className="mt-3 flex items-center gap-2 text-xs text-gray-400">
+        <div className={`mt-3 flex items-center gap-1.5 text-xs font-bold ${statusIconColors[status]}`}>
           <AlertCircle size={14} />
           <span>
-            {status === 'error' && 'No data'}
-            {status === 'warning' && 'Low battery'}
-            {status === 'success' && 'All good'}
+            {status === 'error' && 'No Data Received'}
+            {status === 'warning' && 'Low Battery'}
+            {status === 'success' && 'Systems Nominal'}
           </span>
         </div>
       )}

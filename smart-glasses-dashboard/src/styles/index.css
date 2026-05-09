@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,21 +11,21 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(30, 41, 59, 0.5);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.6);
+  background: rgba(148, 163, 184, 0.4);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.8);
+  background: rgba(148, 163, 184, 0.6);
 }
 
 /* Firefox scrollbar */
 * {
-  scrollbar-color: rgba(148, 163, 184, 0.6) rgba(30, 41, 59, 0.5);
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
   scrollbar-width: thin;
 }
 
@@ -33,16 +35,43 @@ html {
 }
 
 body {
-  @apply bg-dark-950 text-gray-100 font-sans antialiased;
+  @apply bg-slate-50 text-slate-800 font-sans antialiased min-h-screen relative overflow-x-hidden;
+  font-family: 'Outfit', sans-serif;
 }
 
-/* Glassmorphism effect */
+/* Abstract Background Shapes for Creative Feel */
+body::before, body::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  filter: blur(100px);
+  opacity: 0.5;
+}
+
+body::before {
+  width: 600px;
+  height: 600px;
+  background: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+  top: -100px;
+  left: -100px;
+}
+
+body::after {
+  width: 500px;
+  height: 500px;
+  background: linear-gradient(135deg, #f3e8ff 0%, #fae8ff 100%);
+  bottom: -100px;
+  right: -100px;
+}
+
+/* Glassmorphism effect - Light Mode */
 .glass-effect {
-  @apply bg-glass-light backdrop-blur-md border border-white/20 rounded-lg;
+  @apply bg-white/70 backdrop-blur-lg border border-white/80 rounded-2xl shadow-xl shadow-slate-200/50;
 }
 
 .glass-effect-lighter {
-  @apply bg-glass-lighter backdrop-blur-lg border border-white/20 rounded-lg;
+  @apply bg-white/90 backdrop-blur-xl border border-white rounded-2xl shadow-lg shadow-slate-200/40;
 }
 
 /* Smooth animations */
@@ -61,72 +90,75 @@ body {
 
 /* Hover effects for cards */
 .card-hover {
-  @apply transition-smooth hover:scale-105 hover:shadow-lg;
+  @apply transition-smooth hover:-translate-y-1 hover:shadow-2xl hover:shadow-slate-300/60;
 }
 
 /* Custom button styles */
 .btn-primary {
-  @apply px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-smooth font-medium;
+  @apply px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/30 rounded-xl transition-smooth font-semibold tracking-wide;
 }
 
 .btn-secondary {
-  @apply px-4 py-2 bg-dark-700 hover:bg-dark-600 border border-dark-600 rounded-lg transition-smooth font-medium;
+  @apply px-5 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-xl shadow-sm transition-smooth font-semibold;
 }
 
-/* Leaflet map customizations */
+/* Leaflet map customizations - Light Mode */
 .leaflet-container {
-  @apply rounded-lg overflow-hidden;
+  @apply rounded-2xl overflow-hidden shadow-inner;
 }
 
 .leaflet-popup-content-wrapper {
-  @apply bg-dark-800 border border-dark-600 rounded-lg !important;
-  background-color: rgb(31, 41, 55) !important;
+  @apply bg-white border border-slate-100 rounded-xl shadow-xl !important;
 }
 
 .leaflet-popup-content {
-  @apply text-gray-100;
-  color: rgb(243, 244, 246) !important;
+  @apply text-slate-800 font-sans !important;
+  font-family: 'Outfit', sans-serif !important;
+}
+
+.leaflet-popup-tip {
+  @apply bg-white border-slate-100 !important;
 }
 
 /* Notification styles */
 .notification {
-  @apply glass-effect-lighter flex items-center gap-3 p-4 rounded-lg shadow-lg;
-  animation: slideIn 0.3s ease-out;
+  @apply bg-white border border-slate-100 flex items-center gap-3 p-4 rounded-xl shadow-2xl shadow-slate-300/50;
+  animation: slideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(20px) scale(0.95);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0) scale(1);
   }
 }
 
 /* Loading spinner */
 .spinner {
-  @apply inline-block w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin;
+  @apply inline-block w-5 h-5 border-[3px] border-indigo-200 border-t-indigo-600 rounded-full animate-spin;
 }
 
 /* Status badge */
 .badge {
-  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase;
 }
 
 .badge-success {
-  @apply bg-green-500/20 text-green-400;
+  @apply bg-emerald-100 text-emerald-700;
 }
 
 .badge-error {
-  @apply bg-red-500/20 text-red-400;
+  @apply bg-rose-100 text-rose-700;
 }
 
 .badge-warning {
-  @apply bg-yellow-500/20 text-yellow-400;
+  @apply bg-amber-100 text-amber-700;
 }
 
 .badge-info {
-  @apply bg-blue-500/20 text-blue-400;
+  @apply bg-blue-100 text-blue-700;
 }

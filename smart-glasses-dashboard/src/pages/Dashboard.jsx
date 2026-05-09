@@ -29,10 +29,10 @@ export const Dashboard = ({ locationData, loading, onRefresh, onNotification, is
           transition={{ duration: 0.5 }}
           className="mb-8"
         >
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight mb-2">
             Live GPS Tracking
           </h1>
-          <p className="text-gray-400">
+          <p className="text-slate-500 font-medium">
             Real-time location and status monitoring for your smart glasses device
           </p>
 
@@ -40,7 +40,7 @@ export const Dashboard = ({ locationData, loading, onRefresh, onNotification, is
           <button
             onClick={onRefresh}
             disabled={loading}
-            className="mt-4 flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 rounded-lg transition-smooth font-medium"
+            className="mt-6 flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 disabled:opacity-50 text-white rounded-xl shadow-lg shadow-indigo-500/30 transition-smooth font-semibold"
           >
             <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
             Refresh Now
@@ -65,48 +65,48 @@ export const Dashboard = ({ locationData, loading, onRefresh, onNotification, is
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.2 }}
-          className="glass-effect p-6 rounded-xl border-2 border-dark-700"
+          className="bg-white border border-slate-100 p-6 rounded-2xl shadow-xl shadow-slate-200/50"
         >
-          <h2 className="text-xl font-bold text-white mb-4">Device Information</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+          <h2 className="text-xl font-bold text-slate-800 mb-5">Device Information</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
             <div>
-              <p className="text-gray-400 mb-1">Connection Status</p>
+              <p className="text-slate-500 font-semibold uppercase tracking-wider mb-1.5 text-xs">Connection Status</p>
               <div className="flex items-center gap-2">
-                <div className={`w-3 h-3 rounded-full ${isOnline ? 'bg-green-500 animate-pulse-slow' : 'bg-red-500'}`} />
-                <span className="font-medium text-gray-200">
+                <div className={`w-3.5 h-3.5 rounded-full ${isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.6)] animate-pulse-slow' : 'bg-rose-500'}`} />
+                <span className="font-bold text-slate-700 text-base">
                   {isOnline ? 'Connected' : 'Offline'}
                 </span>
               </div>
             </div>
             <div>
-              <p className="text-gray-400 mb-1">Last Sync</p>
-              <p className="font-medium text-gray-200">
+              <p className="text-slate-500 font-semibold uppercase tracking-wider mb-1.5 text-xs">Last Sync</p>
+              <p className="font-bold text-slate-700 text-base">
                 {formattedData.lastUpdate || 'Never'}
               </p>
             </div>
             <div>
-              <p className="text-gray-400 mb-1">Battery Health</p>
-              <div className="flex items-center gap-2">
-                <div className="flex-1 bg-dark-700 rounded-full h-2">
+              <p className="text-slate-500 font-semibold uppercase tracking-wider mb-1.5 text-xs">Battery Health</p>
+              <div className="flex items-center gap-3">
+                <div className="flex-1 bg-slate-100 rounded-full h-3 overflow-hidden border border-slate-200">
                   <div
-                    className={`h-full rounded-full transition-all duration-300 ${
+                    className={`h-full rounded-full transition-all duration-500 ${
                       formattedData.battery > 50
-                        ? 'bg-green-500'
+                        ? 'bg-emerald-500'
                         : formattedData.battery > 20
-                        ? 'bg-yellow-500'
-                        : 'bg-red-500'
+                        ? 'bg-amber-500'
+                        : 'bg-rose-500'
                     }`}
                     style={{ width: `${formattedData.battery}%` }}
                   />
                 </div>
-                <span className="text-sm font-medium text-gray-300 w-8">
+                <span className="text-sm font-extrabold text-slate-700 w-9">
                   {formattedData.battery}%
                 </span>
               </div>
             </div>
             <div>
-              <p className="text-gray-400 mb-1">Network</p>
-              <p className="font-medium text-gray-200">
+              <p className="text-slate-500 font-semibold uppercase tracking-wider mb-1.5 text-xs">Network</p>
+              <p className="font-bold text-slate-700 text-base">
                 {formattedData.wifi}
               </p>
             </div>
@@ -118,14 +118,16 @@ export const Dashboard = ({ locationData, loading, onRefresh, onNotification, is
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5, delay: 0.4 }}
-          className="mt-6 glass-effect p-6 rounded-xl border-2 border-blue-500/30 bg-blue-500/5"
+          className="mt-6 bg-indigo-50/80 border border-indigo-100 p-6 rounded-2xl shadow-md"
         >
-          <h3 className="text-lg font-bold text-blue-400 mb-2">💡 Tips</h3>
-          <ul className="text-sm text-gray-300 space-y-2">
-            <li>• Updates refresh every 5 seconds automatically</li>
-            <li>• Ensure your device has stable WiFi connection</li>
-            <li>• GPS accuracy improves in open environments</li>
-            <li>• Monitor battery level to avoid unexpected shutdowns</li>
+          <h3 className="text-lg font-bold text-indigo-700 mb-3 flex items-center gap-2">
+            <span>💡</span> Quick Tips
+          </h3>
+          <ul className="text-sm text-indigo-900/70 space-y-2.5 font-medium">
+            <li className="flex gap-2"><span>•</span> Updates refresh every 5 seconds automatically</li>
+            <li className="flex gap-2"><span>•</span> Ensure your device has stable WiFi connection</li>
+            <li className="flex gap-2"><span>•</span> GPS accuracy improves in open environments</li>
+            <li className="flex gap-2"><span>•</span> Monitor battery level to avoid unexpected shutdowns</li>
           </ul>
         </motion.div>
       </div>

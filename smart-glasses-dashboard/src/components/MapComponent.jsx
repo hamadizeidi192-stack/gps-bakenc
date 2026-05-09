@@ -44,7 +44,7 @@ export const MapComponent = ({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
-      className="glass-effect-lighter rounded-xl overflow-hidden border-2 border-dark-700 mb-6 h-96 md:h-[500px] relative"
+      className="bg-white rounded-2xl overflow-hidden border border-slate-200 shadow-xl shadow-slate-200/50 mb-6 h-96 md:h-[500px] relative"
     >
       <MapContainer
         center={center}
@@ -53,18 +53,17 @@ export const MapComponent = ({
         ref={mapRef}
       >
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap contributors'
-          className="grayscale"
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+          attribution='&copy; <a href="https://carto.com/">CartoDB</a>'
         />
 
         {latitude && longitude && isOnline && (
           <Marker position={[latitude, longitude]} icon={glassesIcon}>
             <Popup>
-              <div className="text-dark-900 font-semibold">
-                <p>📡 Smart Glasses Location</p>
-                <p className="text-sm">Lat: {latitude.toFixed(6)}</p>
-                <p className="text-sm">Lon: {longitude.toFixed(6)}</p>
+              <div className="text-slate-800 font-semibold p-1">
+                <p className="flex items-center gap-1.5 text-base mb-2"><span className="text-indigo-500">📡</span> Smart Glasses</p>
+                <p className="text-xs text-slate-500 mb-1">Lat: <span className="text-slate-800 font-bold">{latitude.toFixed(6)}</span></p>
+                <p className="text-xs text-slate-500">Lon: <span className="text-slate-800 font-bold">{longitude.toFixed(6)}</span></p>
               </div>
             </Popup>
           </Marker>
@@ -72,35 +71,35 @@ export const MapComponent = ({
       </MapContainer>
 
       {/* Map controls overlay */}
-      <div className="absolute bottom-4 left-4 flex gap-2 z-10">
+      <div className="absolute bottom-4 left-4 flex gap-2 z-[400]">
         <motion.button
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
           onClick={onCenterMap}
-          className="glass-effect p-3 rounded-lg hover:bg-glass-lighter transition-smooth flex items-center gap-2"
+          className="bg-white p-3 rounded-xl hover:bg-slate-50 transition-smooth flex items-center gap-2 border border-slate-200 shadow-lg text-slate-700 font-semibold"
           disabled={loading}
         >
-          <Navigation size={18} className="text-blue-400" />
-          <span className="text-sm hidden sm:inline">Center</span>
+          <Navigation size={18} className="text-indigo-600" />
+          <span className="text-sm hidden sm:inline">Center Map</span>
         </motion.button>
       </div>
 
       {/* Loading state */}
       {loading && (
-        <div className="absolute inset-0 bg-dark-900/50 flex items-center justify-center rounded-lg">
-          <div className="text-center">
-            <div className="spinner mb-3 mx-auto" />
-            <p className="text-gray-300 text-sm">Updating location...</p>
+        <div className="absolute inset-0 bg-white/70 backdrop-blur-sm flex items-center justify-center z-[500]">
+          <div className="text-center bg-white p-6 rounded-2xl shadow-xl border border-slate-100">
+            <div className="spinner mb-4 mx-auto" />
+            <p className="text-slate-700 font-bold">Connecting to GPS...</p>
           </div>
         </div>
       )}
 
       {/* Offline state */}
       {!isOnline && (
-        <div className="absolute inset-0 bg-red-500/20 flex items-center justify-center rounded-lg border-2 border-red-500/50">
-          <div className="text-center">
-            <p className="text-red-300 font-semibold">Device Offline</p>
-            <p className="text-xs text-red-300/80">Waiting for connection...</p>
+        <div className="absolute inset-0 bg-rose-50/80 backdrop-blur-sm flex items-center justify-center z-[500] border-2 border-rose-200/50">
+          <div className="text-center bg-white p-6 rounded-2xl shadow-xl shadow-rose-100 border border-rose-100">
+            <p className="text-rose-600 font-extrabold text-lg mb-1">Device Offline</p>
+            <p className="text-sm text-rose-500 font-medium">Waiting for connection...</p>
           </div>
         </div>
       )}
