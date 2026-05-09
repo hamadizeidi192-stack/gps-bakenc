@@ -15,6 +15,10 @@ const apiClient = axios.create({
   },
 });
 
+// Variables to track when the data actually changes
+let previousUpdateStr = null;
+let lastChangeTime = Date.now();
+
 /**
  * Fetch GPS location data from the Raspberry Pi backend
  * @returns {Promise<Object>} Location data including GPS coordinates, battery, and status
@@ -29,9 +33,21 @@ export const fetchGPSLocation = async () => {
       throw new Error('Empty response from server');
     }
 
+    // Check if the data is actually fresh
+    if (response.data.last_update && response.data.last_update !== previousUpdateStr) {
+      previousUpdateStr = response.data.last_update;
+      lastChangeTime = Date.now();
+    }
+
+    // Consider online if the data has changed within the last 15 seconds
+    // and it's not the default "Never" state
+    const isActuallyOnline = 
+      response.data.last_update !== "Never" && 
+      (Date.now() - lastChangeTime) < 15000;
+
     return {
       ...response.data,
-      isOnline: true,
+      isOnline: isActuallyOnline,
       error: null,
     };
   } catch (error) {
