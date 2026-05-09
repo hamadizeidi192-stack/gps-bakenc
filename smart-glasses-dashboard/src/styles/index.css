@@ -37,8 +37,19 @@ body {
   border-radius: 50%;
 }
 
-.blob-1 { width: 400px; height: 400px; background: #3b82f6; top: -100px; left: -100px; }
-.blob-2 { width: 300px; height: 300px; background: #10b981; bottom: -50px; right: 10%; }
+.blob-1 {
+  width: 400px; height: 400px; background: #3b82f6; top: -100px; left: -100px;
+  animation: float 20s infinite alternate;
+}
+.blob-2 {
+  width: 300px; height: 300px; background: #10b981; bottom: -50px; right: 10%;
+  animation: float 25s infinite alternate-reverse;
+}
+
+@keyframes float {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(100px, 50px) scale(1.1); }
+}
 
 /* ── Card ─────────────────────────────────────── */
 .card {
@@ -47,6 +58,29 @@ body {
   border-radius: 20px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+.card::after {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 40%,
+    rgba(255, 255, 255, 0.4) 50%,
+    rgba(255, 255, 255, 0) 60%,
+    transparent 100%
+  );
+  transform: translateX(-100%) translateY(-100%) rotate(45deg);
+  transition: none;
+  pointer-events: none;
+}
+.card:hover::after {
+  transform: translateX(100%) translateY(100%) rotate(45deg);
+  transition: transform 0.8s ease-in-out;
 }
 .card:hover {
   transform: translateY(-4px);

@@ -15,6 +15,7 @@ function App() {
     battery: 0, wifi: 'Unknown',
     last_update: null, isOnline: false, error: null,
   });
+  const [pathHistory, setPathHistory] = useState([]);
   const [loading, setLoading] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [countdown, setCountdown] = useState(POLL_INTERVAL / 1000);
@@ -26,6 +27,16 @@ function App() {
 
   const handleLocationUpdate = (data) => {
     setLocationData(data);
+    if (data.latitude && data.longitude && data.isOnline) {
+      setPathHistory(prev => {
+        const last = prev[prev.length - 1];
+        // Only add if coordinate changed significantly to avoid duplicates
+        if (!last || last[0] !== data.latitude || last[1] !== data.longitude) {
+          return [...prev.slice(-19), [data.latitude, data.longitude]];
+        }
+        return prev;
+      });
+    }
     setLoading(false);
     setCountdown(POLL_INTERVAL / 1000);
   };
@@ -36,9 +47,9 @@ function App() {
     try {
       const data = await fetchGPSLocation();
       handleLocationUpdate(data);
-      addNotification('Dashboard updated', 'success');
+      addNotification('Data synchronized', 'success');
     } catch {
-      addNotification('Update failed', 'error');
+      addNotification('Sync failed', 'error');
       setLoading(false);
     }
   };
@@ -83,6 +94,7 @@ function App() {
       <main className="lg:ml-64 pt-6">
         <Dashboard
           locationData={locationData}
+          pathHistory={pathHistory}
           loading={loading}
           onRefresh={handleRefresh}
           isOnline={locationData.isOnline}

@@ -3,7 +3,7 @@ import { formatLocationData } from '../services/api';
 import MapComponent from '../components/MapComponent';
 import { StatusCardsGrid } from '../components/StatusCard';
 import { motion } from 'framer-motion';
-import { RefreshCw, Battery, Wifi, Activity, Info, ArrowUpRight } from 'lucide-react';
+import { RefreshCw, Battery, Wifi, Activity, Info, ArrowUpRight, BarChart3, Clock, ShieldCheck } from 'lucide-react';
 
 // ── Countdown ─────────────────────────────────────────────────────────────────
 const Countdown = ({ countdown, total }) => {
@@ -28,8 +28,36 @@ const Countdown = ({ countdown, total }) => {
   );
 };
 
+// ── Mock Mini Chart ───────────────────────────────────────────────────────────
+const MiniChart = ({ color = '#3b82f6' }) => (
+  <div className="h-16 w-full mt-4">
+    <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="grad" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style={{ stopColor: color, stopOpacity: 0.2 }} />
+          <stop offset="100%" style={{ stopColor: color, stopOpacity: 0 }} />
+        </linearGradient>
+      </defs>
+      <path
+        d="M0,40 L0,25 Q15,10 30,28 T60,15 T100,20 L100,40 Z"
+        fill="url(#grad)"
+      />
+      <motion.path
+        initial={{ pathLength: 0 }}
+        animate={{ pathLength: 1 }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
+        d="M0,25 Q15,10 30,28 T60,15 T100,20"
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  </div>
+);
+
 // ── Dashboard ──────────────────────────────────────────────────────────────────
-export const Dashboard = ({ locationData, loading, onRefresh, isOnline, countdown = 30, pollInterval = 30 }) => {
+export const Dashboard = ({ locationData, pathHistory = [], loading, onRefresh, isOnline, countdown = 30, pollInterval = 30 }) => {
   const mapRef = useRef(null);
   const fd = formatLocationData(locationData);
 
@@ -47,18 +75,18 @@ export const Dashboard = ({ locationData, loading, onRefresh, isOnline, countdow
           <div className="flex items-center gap-2 mb-2">
             <span className={`pill ${isOnline ? 'pill-green' : 'pill-red'}`}>
               <span className={`status-dot ${isOnline ? 'online' : 'offline'}`} />
-              {isOnline ? 'SYSTEM OPERATIONAL' : 'CONNECTION OFFLINE'}
+              {isOnline ? 'LIVE TELEMETRY' : 'DEVICE DISCONNECTED'}
             </span>
           </div>
-          <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Device Overview</h1>
-          <p className="text-slate-500 font-medium">Monitoring your smart glasses telemetry in real-time.</p>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Monitor Console</h1>
+          <p className="text-slate-500 font-medium italic">Stream encrypted GPS coordinates and power analytics.</p>
         </div>
 
         <div className="flex items-center gap-3 w-full lg:w-auto">
           <Countdown countdown={countdown} total={pollInterval} />
-          <button onClick={onRefresh} disabled={loading} className="btn-primary ml-auto lg:ml-0">
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-            {loading ? 'SYNCING' : 'REFRESH'}
+          <button onClick={onRefresh} disabled={loading} className="btn-primary ml-auto lg:ml-0 group">
+            <RefreshCw size={18} className={`${loading ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+            {loading ? 'SYNCING...' : 'REFRESH NOW'}
           </button>
         </div>
       </motion.div>
@@ -69,55 +97,80 @@ export const Dashboard = ({ locationData, loading, onRefresh, isOnline, countdow
       {/* ── Main Section ────────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 mb-6">
         <div className="xl:col-span-3">
-          <MapComponent latitude={locationData.latitude} longitude={locationData.longitude}
-            isOnline={isOnline} loading={loading} onCenterMap={handleCenter} mapRef={mapRef} />
+          <MapComponent
+            latitude={locationData.latitude}
+            longitude={locationData.longitude}
+            pathHistory={pathHistory}
+            isOnline={isOnline}
+            loading={loading}
+            onCenterMap={handleCenter}
+            mapRef={mapRef}
+          />
         </div>
 
         {/* Info Column */}
         <div className="space-y-6">
-          <div className="card p-6 border-b-4 border-b-blue-500">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Battery Status</p>
-              <Battery size={16} className="text-slate-300" />
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }} className="card p-6 border-b-4 border-b-blue-500">
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Battery History</p>
+              <BarChart3 size={16} className="text-blue-500" />
             </div>
-            <div className="flex items-end gap-2 mb-3">
+            <div className="flex items-end gap-2">
               <span className="text-4xl font-black text-slate-900">{fd.battery}%</span>
-              <span className="text-xs font-bold text-emerald-500 mb-2 flex items-center"><ArrowUpRight size={14} /> Stable</span>
+              <span className="text-xs font-bold text-emerald-500 mb-2 flex items-center bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-100">
+                <ArrowUpRight size={14} className="mr-0.5" /> Normal
+              </span>
             </div>
-            <div className="progress-track">
-              <div className="progress-fill bg-blue-500 shadow-[0_0_10px_#3b82f640]" style={{ width: `${fd.battery}%` }} />
+            <MiniChart color="#3b82f6" />
+            <div className="mt-4 progress-track">
+              <div className="progress-fill bg-blue-500" style={{ width: `${fd.battery}%` }} />
             </div>
-          </div>
+          </motion.div>
 
-          <div className="card p-6">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Network Info</p>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }} className="card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Network Link</p>
+              <Wifi size={16} className="text-emerald-500" />
+            </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Wifi size={16} className="text-blue-500" />
-                  <span className="text-sm font-bold text-slate-700">SSID</span>
-                </div>
-                <span className="text-sm font-black text-slate-900">{fd.wifi || '—'}</span>
+                <span className="text-sm font-bold text-slate-500">SSID</span>
+                <span className="text-sm font-black text-slate-800">{fd.wifi || 'Unknown'}</span>
               </div>
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Activity size={16} className="text-blue-500" />
-                  <span className="text-sm font-bold text-slate-700">Latency</span>
-                </div>
-                <span className="text-sm font-black text-slate-900">24ms</span>
+                <span className="text-sm font-bold text-slate-500">Uptime</span>
+                <span className="text-sm font-black text-slate-800">12h 43m</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-bold text-slate-500">Packets</span>
+                <span className="text-sm font-black text-emerald-600 font-mono">OK [200]</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="rounded-3xl bg-blue-600 p-6 text-white shadow-xl shadow-blue-200">
-            <div className="flex items-center gap-2 mb-4">
-              <Info size={18} />
-              <p className="text-xs font-bold uppercase tracking-wider">Device Health</p>
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="rounded-[2rem] bg-slate-900 p-6 text-white shadow-2xl relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <Activity size={80} />
             </div>
-            <p className="text-sm font-medium leading-relaxed opacity-90">
-              Your device is sending high-precision GPS coordinates every 30 seconds. Battery health is optimal.
-            </p>
-          </div>
+            <div className="flex items-center gap-2 mb-4 relative z-10">
+              <div className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-blue-400">System Log</p>
+            </div>
+            <div className="space-y-3 relative z-10">
+              <div className="flex gap-3">
+                <Clock size={14} className="text-slate-500 flex-shrink-0" />
+                <p className="text-[11px] font-medium text-slate-300 leading-tight">
+                  Satellite lock confirmed. Accuracy: 2.4 meters.
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" />
+                <p className="text-[11px] font-medium text-slate-300 leading-tight">
+                  End-to-end encryption active on current data packets.
+                </p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </div>
 
