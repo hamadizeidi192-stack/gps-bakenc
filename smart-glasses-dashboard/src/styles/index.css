@@ -1,396 +1,232 @@
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&family=Orbitron:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* ============================================
-   SCROLLBAR
-   ============================================ */
+/* ── Scrollbar ────────────────────────────────── */
 ::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: #050a0f; }
-::-webkit-scrollbar-thumb { background: rgba(0, 240, 255, 0.35); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(0, 240, 255, 0.6); }
-* { scrollbar-color: rgba(0, 240, 255, 0.35) #050a0f; scrollbar-width: thin; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 10px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.16); }
 
-/* ============================================
-   BASE BODY — DEEP SPACE
-   ============================================ */
+/* ── Base ─────────────────────────────────────── */
 html { scroll-behavior: smooth; }
 
 body {
-  background-color: #020810;
-  color: #00f0ff;
-  font-family: 'Share Tech Mono', monospace;
+  background: #080c14;
+  color: #e2e8f0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
-  position: relative;
+  -webkit-font-smoothing: antialiased;
 }
 
-/* ============================================
-   LAYER 1: ANIMATED STAR FIELD
-   ============================================ */
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -3;
-  background-image:
-    radial-gradient(1px 1px at 10% 15%, rgba(0,240,255,0.6) 0%, transparent 100%),
-    radial-gradient(1px 1px at 25% 40%, rgba(0,240,255,0.4) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 40% 70%, rgba(255,154,0,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 55% 20%, rgba(0,240,255,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 70% 55%, rgba(0,255,65,0.4) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 80% 80%, rgba(0,240,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 90% 30%, rgba(255,0,60,0.4) 0%, transparent 100%),
-    radial-gradient(1px 1px at 15% 85%, rgba(0,240,255,0.5) 0%, transparent 100%),
-    radial-gradient(1px 1px at 35% 10%, rgba(0,240,255,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 60% 90%, rgba(255,154,0,0.3) 0%, transparent 100%),
-    radial-gradient(1.5px 1.5px at 75% 5%, rgba(0,240,255,0.6) 0%, transparent 100%),
-    radial-gradient(1px 1px at 5% 60%, rgba(0,255,65,0.3) 0%, transparent 100%),
-    radial-gradient(1px 1px at 45% 50%, rgba(0,240,255,0.2) 0%, transparent 100%),
-    radial-gradient(1px 1px at 95% 75%, rgba(0,240,255,0.4) 0%, transparent 100%);
-  background-size: 100% 100%;
-  animation: starTwinkle 6s ease-in-out infinite alternate;
-}
-
-@keyframes starTwinkle {
-  0%   { opacity: 0.5; transform: scale(1); }
-  50%  { opacity: 0.9; }
-  100% { opacity: 0.6; transform: scale(1.01); }
-}
-
-/* ============================================
-   LAYER 2: ANIMATED GRID
-   ============================================ */
-.hud-grid-bg {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  background-image:
-    linear-gradient(rgba(0, 240, 255, 0.035) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 240, 255, 0.035) 1px, transparent 1px);
-  background-size: 50px 50px;
-  animation: gridDrift 25s linear infinite;
-}
-
-@keyframes gridDrift {
-  0%   { background-position: 0 0; }
-  100% { background-position: 50px 50px; }
-}
-
-/* ============================================
-   LAYER 3: CRT SCANLINES
-   ============================================ */
-.hud-scanlines {
+/* ── Background: gradient mesh ────────────────── */
+.bg-mesh {
   position: fixed;
   inset: 0;
   z-index: -1;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 0, 0, 0.06) 2px,
-    rgba(0, 0, 0, 0.06) 4px
-  );
-  pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% -10%, rgba(120, 80, 255, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 50% at 80% 110%, rgba(34, 211, 238, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 50% 50%, rgba(96, 165, 250, 0.04) 0%, transparent 70%);
 }
 
-/* ============================================
-   LAYER 4: AMBIENT GLOW ORBS
-   ============================================ */
-.hud-orbs {
-  position: fixed;
-  inset: 0;
-  z-index: -2;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.hud-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(100px);
-  animation: orbFloat 15s ease-in-out infinite;
-}
-
-.hud-orb-1 {
-  width: 400px; height: 400px;
-  background: radial-gradient(circle, rgba(0, 240, 255, 0.08) 0%, transparent 70%);
-  top: -100px; left: -100px;
-  animation-duration: 18s;
-}
-
-.hud-orb-2 {
-  width: 300px; height: 300px;
-  background: radial-gradient(circle, rgba(255, 154, 0, 0.06) 0%, transparent 70%);
-  bottom: -80px; right: 10%;
-  animation-duration: 22s;
-  animation-delay: -7s;
-}
-
-.hud-orb-3 {
-  width: 350px; height: 350px;
-  background: radial-gradient(circle, rgba(0, 255, 65, 0.05) 0%, transparent 70%);
-  top: 40%; right: -80px;
-  animation-duration: 20s;
-  animation-delay: -12s;
-}
-
-@keyframes orbFloat {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
-  33%       { transform: translate(30px, -20px) scale(1.05); opacity: 0.9; }
-  66%       { transform: translate(-20px, 30px) scale(0.95); opacity: 0.7; }
-}
-
-/* ============================================
-   HUD GLASS EFFECT
-   ============================================ */
-.glass-effect {
-  background: rgba(0, 15, 30, 0.6);
-  border: 1px solid rgba(0, 240, 255, 0.2);
-  border-radius: 3px;
+/* ── Glass Card ───────────────────────────────── */
+.card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 16px;
   backdrop-filter: blur(12px);
-  box-shadow:
-    0 0 20px rgba(0, 240, 255, 0.04),
-    inset 0 0 20px rgba(0, 240, 255, 0.02);
+  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
 }
 
-.glass-effect-lighter {
-  background: rgba(5, 12, 22, 0.88);
-  border: 1px solid rgba(0, 240, 255, 0.18);
-  backdrop-filter: blur(20px);
+.card:hover {
+  border-color: rgba(255, 255, 255, 0.13);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.5);
+  transform: translateY(-2px);
 }
 
-/* ============================================
-   NEON GLOW TEXT
-   ============================================ */
-.glow-cyan   { color: #00f0ff; text-shadow: 0 0 10px #00f0ff, 0 0 25px rgba(0,240,255,0.4); }
-.glow-orange { color: #ff9a00; text-shadow: 0 0 10px #ff9a00, 0 0 25px rgba(255,154,0,0.4); }
-.glow-green  { color: #00ff41; text-shadow: 0 0 10px #00ff41, 0 0 25px rgba(0,255,65,0.4); }
-.glow-red    { color: #ff003c; text-shadow: 0 0 10px #ff003c, 0 0 25px rgba(255,0,60,0.4); }
-
-/* ============================================
-   HUD CARD
-   ============================================ */
-.hud-card {
-  background: rgba(0, 8, 20, 0.75);
-  border: 1px solid rgba(0, 240, 255, 0.22);
-  border-radius: 3px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.35s ease;
-  backdrop-filter: blur(8px);
+.card-accent {
+  background: linear-gradient(135deg, rgba(167,139,250,0.07) 0%, rgba(96,165,250,0.05) 100%);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-radius: 16px;
+  backdrop-filter: blur(12px);
 }
 
-/* Top scan line sweep */
-.hud-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: -100%;
-  width: 60%; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(0, 240, 255, 0.8), transparent);
-  animation: cardScan 4s ease-in-out infinite;
+/* ── Gradient text ────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #a78bfa 0%, #60a5fa 60%, #22d3ee 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.hud-card:hover {
-  border-color: rgba(0, 240, 255, 0.6);
-  box-shadow:
-    0 0 40px rgba(0, 240, 255, 0.12),
-    inset 0 0 30px rgba(0, 240, 255, 0.04),
-    0 -1px 0 rgba(0, 240, 255, 0.5) inset;
-  transform: translateY(-3px);
-}
-
-.hud-card.warning { border-color: rgba(255, 154, 0, 0.35); }
-.hud-card.warning::before { background: linear-gradient(90deg, transparent, rgba(255,154,0,0.8), transparent); }
-.hud-card.warning:hover { border-color: rgba(255,154,0,0.7); box-shadow: 0 0 40px rgba(255,154,0,0.1); }
-
-.hud-card.error { border-color: rgba(255, 0, 60, 0.35); }
-.hud-card.error::before { background: linear-gradient(90deg, transparent, rgba(255,0,60,0.8), transparent); }
-.hud-card.error:hover { border-color: rgba(255,0,60,0.7); box-shadow: 0 0 40px rgba(255,0,60,0.1); }
-
-.hud-card.success { border-color: rgba(0, 255, 65, 0.3); }
-.hud-card.success::before { background: linear-gradient(90deg, transparent, rgba(0,255,65,0.8), transparent); }
-
-@keyframes cardScan {
-  0%   { left: -60%; opacity: 0; }
-  10%  { opacity: 1; }
-  90%  { opacity: 1; }
-  100% { left: 160%; opacity: 0; }
-}
-
-/* ============================================
-   CORNER BRACKETS MIXIN
-   ============================================ */
-.hud-brackets { position: relative; }
-.hud-brackets::before, .hud-brackets::after {
-  content: ''; position: absolute;
-  width: 14px; height: 14px;
-  border-color: #00f0ff; border-style: solid; opacity: 0.7;
-}
-.hud-brackets::before { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
-.hud-brackets::after  { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
-
-/* ============================================
-   BUTTONS
-   ============================================ */
+/* ── Buttons ──────────────────────────────────── */
 .btn-primary {
-  background: transparent;
-  border: 1px solid #00f0ff;
-  color: #00f0ff;
-  font-family: 'Share Tech Mono', monospace;
-  text-transform: uppercase;
-  letter-spacing: 2px;
-  padding: 9px 22px;
-  position: relative;
-  overflow: hidden;
-  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  color: #fff;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 14px;
+  letter-spacing: 0.01em;
+  border: none;
   cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
 }
-.btn-primary::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 240, 255, 0.08);
-  transform: translateX(-100%);
-  transition: transform 0.3s ease;
-}
-.btn-primary:hover::after { transform: translateX(0); }
 .btn-primary:hover {
-  box-shadow: 0 0 25px rgba(0,240,255,0.35), inset 0 0 15px rgba(0,240,255,0.05);
-  text-shadow: 0 0 10px #00f0ff;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 25px rgba(124, 58, 237, 0.45);
 }
-.btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
 
-.btn-secondary {
-  background: transparent;
-  border: 1px solid rgba(0, 240, 255, 0.25);
-  color: rgba(0, 240, 255, 0.55);
-  font-family: 'Share Tech Mono', monospace;
-  padding: 6px 16px;
-  transition: all 0.3s ease;
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: rgba(255,255,255,0.05);
+  color: rgba(255,255,255,0.7);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  font-weight: 500;
+  font-size: 13px;
   cursor: pointer;
+  transition: all 0.2s ease;
 }
-.btn-secondary:hover {
-  border-color: rgba(0, 240, 255, 0.55);
-  color: #00f0ff;
-  box-shadow: 0 0 15px rgba(0,240,255,0.1);
+.btn-ghost:hover {
+  background: rgba(255,255,255,0.09);
+  border-color: rgba(255,255,255,0.15);
+  color: #fff;
 }
 
-/* ============================================
-   SPINNER
-   ============================================ */
+/* ── Status dot ───────────────────────────────── */
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.status-dot.online {
+  background: #34d399;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.2);
+  animation: statusPulse 2.5s ease-in-out infinite;
+}
+.status-dot.offline {
+  background: #f87171;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2);
+}
+
+@keyframes statusPulse {
+  0%, 100% { box-shadow: 0 0 0 3px rgba(52,211,153,0.2); }
+  50%       { box-shadow: 0 0 0 6px rgba(52,211,153,0.08); }
+}
+
+/* ── Pill badge ───────────────────────────────── */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.pill-green  { background: rgba(52,211,153,0.12);  color: #34d399; border: 1px solid rgba(52,211,153,0.2); }
+.pill-red    { background: rgba(248,113,113,0.12); color: #f87171; border: 1px solid rgba(248,113,113,0.2); }
+.pill-purple { background: rgba(167,139,250,0.12); color: #a78bfa; border: 1px solid rgba(167,139,250,0.2); }
+.pill-blue   { background: rgba(96,165,250,0.12);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.2); }
+.pill-orange { background: rgba(251,146,60,0.12);  color: #fb923c; border: 1px solid rgba(251,146,60,0.2); }
+
+/* ── Spinner ──────────────────────────────────── */
 .spinner {
   display: inline-block;
-  width: 20px; height: 20px;
-  border: 2px solid rgba(0, 240, 255, 0.15);
-  border-top-color: #00f0ff;
+  width: 18px; height: 18px;
+  border: 2px solid rgba(167,139,250,0.2);
+  border-top-color: #a78bfa;
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
-  box-shadow: 0 0 10px rgba(0, 240, 255, 0.25);
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ============================================
-   NOTIFICATIONS
-   ============================================ */
+/* ── Progress bar ─────────────────────────────── */
+.progress-track {
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 100px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  border-radius: 100px;
+  transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Countdown ring ───────────────────────────── */
+.countdown-svg circle { transition: stroke-dashoffset 1s linear, stroke 0.4s ease; }
+
+/* ── Notification ─────────────────────────────── */
 .notification {
-  background: rgba(3, 10, 20, 0.96);
-  border: 1px solid rgba(0, 240, 255, 0.35);
-  border-left: 3px solid #00f0ff;
-  box-shadow: 0 0 25px rgba(0, 240, 255, 0.12), 4px 0 0 rgba(0, 240, 255, 0.06) inset;
+  background: rgba(15, 20, 35, 0.96);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.5);
   backdrop-filter: blur(16px);
-  font-family: 'Share Tech Mono', monospace;
-  border-radius: 2px;
   padding: 12px 16px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-}
-@keyframes slideIn {
-  from { opacity: 0; transform: translateX(50px); }
-  to   { opacity: 1; transform: translateX(0); }
+  max-width: 340px;
 }
 
-/* ============================================
-   BADGES
-   ============================================ */
-.badge { display: inline-flex; align-items: center; padding: 2px 10px; font-size: 11px; font-family: 'Share Tech Mono', monospace; letter-spacing: 1px; text-transform: uppercase; border-radius: 2px; }
-.badge-success { background: rgba(0,255,65,0.08);  color: #00ff41; border: 1px solid rgba(0,255,65,0.3); }
-.badge-error   { background: rgba(255,0,60,0.08);  color: #ff003c; border: 1px solid rgba(255,0,60,0.3); }
-.badge-warning { background: rgba(255,154,0,0.08); color: #ff9a00; border: 1px solid rgba(255,154,0,0.3); }
-.badge-info    { background: rgba(0,240,255,0.08); color: #00f0ff; border: 1px solid rgba(0,240,255,0.3); }
-
-/* ============================================
-   TRANSITIONS
-   ============================================ */
-.transition-smooth { transition: all 0.3s ease-out; }
-.card-hover { transition: all 0.3s ease; }
-
-/* ============================================
-   LEAFLET MAP
-   ============================================ */
-.leaflet-container { border-radius: 2px; }
+/* ── Leaflet overrides ────────────────────────── */
+.leaflet-container { border-radius: 14px; }
 .leaflet-popup-content-wrapper {
-  background: rgba(3, 10, 20, 0.97) !important;
-  border: 1px solid rgba(0, 240, 255, 0.4) !important;
-  border-radius: 3px !important;
-  box-shadow: 0 0 25px rgba(0, 240, 255, 0.2) !important;
-  color: #00f0ff !important;
+  background: rgba(12, 17, 30, 0.97) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6) !important;
+  color: #e2e8f0 !important;
 }
-.leaflet-popup-content { color: #00f0ff !important; font-family: 'Share Tech Mono', monospace !important; margin: 12px 16px !important; }
-.leaflet-popup-tip { background: rgba(3, 10, 20, 0.97) !important; }
-.leaflet-control-zoom a { background: rgba(3, 10, 20, 0.9) !important; color: #00f0ff !important; border-color: rgba(0, 240, 255, 0.3) !important; }
-.leaflet-control-zoom a:hover { background: rgba(0, 240, 255, 0.1) !important; }
+.leaflet-popup-content {
+  color: #e2e8f0 !important;
+  font-family: 'Plus Jakarta Sans', sans-serif !important;
+  font-size: 13px !important;
+  margin: 14px 16px !important;
+}
+.leaflet-popup-tip { background: rgba(12,17,30,0.97) !important; }
+.leaflet-control-zoom a {
+  background: rgba(12,17,30,0.9) !important;
+  color: rgba(255,255,255,0.6) !important;
+  border-color: rgba(255,255,255,0.08) !important;
+  font-size: 16px !important;
+}
+.leaflet-control-zoom a:hover { color: #fff !important; background: rgba(255,255,255,0.05) !important; }
 
-/* ============================================
-   PULSE ANIMATIONS
-   ============================================ */
-.animate-pulse-slow { animation: hudPulse 2.5s ease-in-out infinite; }
-@keyframes hudPulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 5px currentColor; }
-  50%       { opacity: 0.5; box-shadow: 0 0 15px currentColor, 0 0 30px currentColor; }
-}
-
-/* ============================================
-   COUNTDOWN RING
-   ============================================ */
-.countdown-ring {
-  transform: rotate(-90deg);
-}
-.countdown-ring circle {
-  transition: stroke-dashoffset 1s linear;
-  stroke-linecap: round;
-}
-
-/* ============================================
-   DATA STREAM TEXT
-   ============================================ */
-.data-stream {
-  font-family: 'Share Tech Mono', monospace;
-  font-size: 11px;
-  color: rgba(0, 240, 255, 0.35);
+/* ── Ticker bar ───────────────────────────────── */
+.ticker-track { overflow: hidden; }
+.ticker-content {
+  display: inline-flex;
+  gap: 40px;
   white-space: nowrap;
-  overflow: hidden;
-  animation: dataScroll 20s linear infinite;
+  animation: ticker 30s linear infinite;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: rgba(255,255,255,0.3);
 }
-@keyframes dataScroll {
-  0%   { transform: translateX(100%); }
-  100% { transform: translateX(-200%); }
-}
-
-/* ============================================
-   RADAR RING
-   ============================================ */
-@keyframes radarPing {
-  0%   { transform: scale(0.5); opacity: 0.9; }
-  100% { transform: scale(3.5); opacity: 0; }
+@keyframes ticker {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
 }
 
-.radar-ring {
-  position: absolute;
-  border-radius: 50%;
-  border: 1px solid rgba(0, 240, 255, 0.6);
-  animation: radarPing 2.5s ease-out infinite;
-}
+/* ── Smooth transition ────────────────────────── */
+.transition-smooth { transition: all 0.25s ease; }

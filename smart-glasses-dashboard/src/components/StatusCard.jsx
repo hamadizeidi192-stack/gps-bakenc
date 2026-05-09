@@ -1,82 +1,92 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Zap, Wifi, Clock, AlertCircle, MapPin, Signal } from 'lucide-react';
+import { MapPin, Zap, Wifi, Clock, Signal, AlertTriangle } from 'lucide-react';
 
-const statusConfig = {
-  normal: { borderColor: 'rgba(0, 240, 255, 0.3)', glowColor: '#00f0ff', textColor: '#00f0ff', cardClass: '' },
-  warning: { borderColor: 'rgba(255, 154, 0, 0.4)', glowColor: '#ff9a00', textColor: '#ff9a00', cardClass: 'warning' },
-  error: { borderColor: 'rgba(255, 0, 60, 0.4)', glowColor: '#ff003c', textColor: '#ff003c', cardClass: 'error' },
-  success: { borderColor: 'rgba(0, 255, 65, 0.35)', glowColor: '#00ff41', textColor: '#00ff41', cardClass: 'success' },
+const cardTheme = {
+  success: {
+    icon: 'rgba(52,211,153,0.15)',
+    iconColor: '#34d399',
+    value: '#e2e8f0',
+    pill: 'pill-green',
+    pillLabel: 'Good',
+    border: 'rgba(52,211,153,0.12)',
+  },
+  warning: {
+    icon: 'rgba(251,146,60,0.15)',
+    iconColor: '#fb923c',
+    value: '#e2e8f0',
+    pill: 'pill-orange',
+    pillLabel: 'Warning',
+    border: 'rgba(251,146,60,0.15)',
+  },
+  error: {
+    icon: 'rgba(248,113,113,0.15)',
+    iconColor: '#f87171',
+    value: 'rgba(255,255,255,0.4)',
+    pill: 'pill-red',
+    pillLabel: 'No Data',
+    border: 'rgba(248,113,113,0.12)',
+  },
+  normal: {
+    icon: 'rgba(167,139,250,0.12)',
+    iconColor: '#a78bfa',
+    value: '#e2e8f0',
+    pill: 'pill-purple',
+    pillLabel: 'Active',
+    border: 'rgba(255,255,255,0.07)',
+  },
 };
 
-export const StatusCard = ({ icon: Icon, label, value, unit = '', status = 'normal', loading = false, code = '00' }) => {
-  const cfg = statusConfig[status] || statusConfig.normal;
+export const StatCard = ({ icon: Icon, label, value, unit = '', status = 'normal', loading = false, index = 0 }) => {
+  const t = cardTheme[status] || cardTheme.normal;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4 }}
-      className={`hud-card ${cfg.cardClass} p-5`}
+      transition={{ duration: 0.4, delay: index * 0.06 }}
+      className="card p-5 flex flex-col gap-4"
+      style={{ borderColor: t.border }}
     >
-      {/* Top row: icon + code */}
-      <div className="flex items-center justify-between mb-4">
+      {/* Top row */}
+      <div className="flex items-center justify-between">
         <div
-          className="w-10 h-10 flex items-center justify-center relative"
-          style={{ border: `1px solid ${cfg.borderColor}`, background: `${cfg.glowColor}08` }}
+          className="w-10 h-10 rounded-xl flex items-center justify-center"
+          style={{ background: t.icon }}
         >
-          <Icon size={18} style={{ color: cfg.glowColor, filter: `drop-shadow(0 0 5px ${cfg.glowColor})` }} />
-          {/* Corner brackets */}
-          <span className="absolute top-0 left-0 w-2 h-2 border-t border-l" style={{ borderColor: cfg.glowColor, opacity: 0.7 }} />
-          <span className="absolute bottom-0 right-0 w-2 h-2 border-b border-r" style={{ borderColor: cfg.glowColor, opacity: 0.7 }} />
+          <Icon size={18} style={{ color: t.iconColor }} />
         </div>
-        <span className="text-xs font-mono opacity-30" style={{ color: cfg.glowColor }}>
-          [{code}]
-        </span>
+        {!loading && (
+          <span className={`pill ${t.pill} text-[10px]`}>{t.pillLabel}</span>
+        )}
       </div>
 
-      {/* Label */}
-      <p className="text-xs tracking-widest uppercase mb-2 opacity-60" style={{ color: cfg.glowColor }}>
-        {label}
-      </p>
-
       {/* Value */}
-      {loading ? (
-        <div className="flex items-center gap-2 h-9">
-          <div className="spinner" />
-          <span className="text-sm opacity-50" style={{ color: cfg.glowColor }}>LOADING...</span>
-        </div>
-      ) : (
-        <div className="flex items-baseline gap-1.5">
-          <span
-            className="text-2xl font-bold tracking-wider"
-            style={{
-              color: cfg.glowColor,
-              textShadow: `0 0 12px ${cfg.glowColor}`,
-              fontFamily: '"Orbitron", monospace',
-            }}
-          >
-            {value}
-          </span>
-          {unit && (
-            <span className="text-sm opacity-60" style={{ color: cfg.glowColor }}>
-              {unit}
+      <div>
+        <p className="text-xs font-medium text-white/40 mb-1 tracking-wide">{label}</p>
+        {loading ? (
+          <div className="flex items-center gap-2 h-8">
+            <div className="spinner" />
+            <span className="text-sm text-white/30">Loading…</span>
+          </div>
+        ) : (
+          <div className="flex items-baseline gap-1">
+            <span
+              className="text-2xl font-bold tracking-tight"
+              style={{ color: t.value }}
+            >
+              {value ?? '—'}
             </span>
-          )}
-        </div>
-      )}
+            {unit && <span className="text-sm font-medium text-white/40">{unit}</span>}
+          </div>
+        )}
+      </div>
 
-      {/* Status Footer */}
-      {status !== 'normal' && !loading && (
-        <div className="flex items-center gap-1.5 mt-3 pt-3"
-          style={{ borderTop: `1px solid ${cfg.borderColor}` }}
-        >
-          <AlertCircle size={11} style={{ color: cfg.glowColor }} />
-          <span className="text-xs tracking-widest opacity-70" style={{ color: cfg.glowColor }}>
-            {status === 'error' && '// NO_SIGNAL'}
-            {status === 'warning' && '// LOW_POWER'}
-            {status === 'success' && '// NOMINAL'}
-          </span>
+      {/* Status bar */}
+      {status === 'warning' && !loading && (
+        <div className="flex items-center gap-1.5 text-xs" style={{ color: '#fb923c' }}>
+          <AlertTriangle size={11} />
+          <span>Low battery — charge soon</span>
         </div>
       )}
     </motion.div>
@@ -84,36 +94,36 @@ export const StatusCard = ({ icon: Icon, label, value, unit = '', status = 'norm
 };
 
 export const StatusCardsGrid = ({ data, loading }) => {
-  const getStatus = (label, value) => {
-    if (loading || value === null || value === 'N/A') return 'error';
-    if (label === 'Battery' && value < 20) return 'warning';
-    if (label === 'WiFi' && value === 'Disconnected') return 'error';
+  const getStatus = (field, value) => {
+    if (loading || value === null || value === 'N/A' || value === undefined) return 'error';
+    if (field === 'Battery' && value < 20) return 'warning';
+    if (field === 'WiFi' && value === 'Disconnected') return 'error';
     return 'success';
   };
 
   const cards = [
-    { icon: MapPin, label: 'Latitude', value: data.latitude, code: 'LAT', field: 'Latitude' },
-    { icon: MapPin, label: 'Longitude', value: data.longitude, code: 'LNG', field: 'Longitude' },
-    { icon: Zap, label: 'Battery', value: data.battery, unit: '%', code: 'PWR', field: 'Battery' },
-    { icon: Wifi, label: 'Network', value: data.wifi, code: 'NET', field: 'WiFi' },
-    { icon: Clock, label: 'Last Sync', value: data.lastUpdate, code: 'TMP', field: 'Time' },
-    { icon: Signal, label: 'Status', value: data.isOnline ? 'ONLINE' : 'OFFLINE', code: 'CON', field: 'Status' },
+    { icon: MapPin,  label: 'Latitude',   value: data.latitude,   field: 'Latitude',  index: 0 },
+    { icon: MapPin,  label: 'Longitude',  value: data.longitude,  field: 'Longitude', index: 1 },
+    { icon: Zap,     label: 'Battery',    value: data.battery,    unit: '%', field: 'Battery', index: 2 },
+    { icon: Wifi,    label: 'Network',    value: data.wifi,       field: 'WiFi',      index: 3 },
+    { icon: Clock,   label: 'Last Sync',  value: data.lastUpdate, field: 'Time',      index: 4 },
+    { icon: Signal,  label: 'Status',     value: data.isOnline ? 'Online' : 'Offline', field: 'Status', index: 5 },
   ];
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-      {cards.map((card, i) => (
-        <StatusCard
-          key={card.code}
-          icon={card.icon}
-          label={card.label}
-          value={card.value}
-          unit={card.unit}
-          code={card.code}
+    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
+      {cards.map(c => (
+        <StatCard
+          key={c.label}
+          icon={c.icon}
+          label={c.label}
+          value={c.value}
+          unit={c.unit}
           loading={loading}
-          status={card.field === 'Status'
+          index={c.index}
+          status={c.field === 'Status'
             ? (data.isOnline ? 'success' : 'error')
-            : getStatus(card.field, card.value)
+            : getStatus(c.field, c.value)
           }
         />
       ))}
@@ -121,4 +131,4 @@ export const StatusCardsGrid = ({ data, loading }) => {
   );
 };
 
-export default StatusCard;
+export default StatCard;

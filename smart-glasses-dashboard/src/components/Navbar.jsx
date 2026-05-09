@@ -1,96 +1,60 @@
 import React from 'react';
-import { Menu, Settings, HelpCircle } from 'lucide-react';
+import { Menu, Settings, Bell } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-export const Navbar = ({ onMenuToggle, isSidebarOpen }) => {
+export const Navbar = ({ onMenuToggle }) => {
   return (
     <motion.nav
-      initial={{ y: -80 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.5 }}
+      initial={{ y: -64, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.4 }}
       className="fixed top-0 left-0 right-0 h-16 z-40"
       style={{
-        background: 'rgba(5, 10, 15, 0.92)',
-        borderBottom: '1px solid rgba(0, 240, 255, 0.25)',
-        backdropFilter: 'blur(16px)',
-        boxShadow: '0 0 30px rgba(0, 240, 255, 0.06)',
+        background: 'rgba(8,12,20,0.8)',
+        borderBottom: '1px solid rgba(255,255,255,0.07)',
+        backdropFilter: 'blur(20px)',
       }}
     >
-      {/* Top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-60" />
-
-      <div className="h-full px-4 md:px-6 flex items-center justify-between">
-        {/* Left side */}
-        <div className="flex items-center gap-4">
+      <div className="h-full max-w-screen-2xl mx-auto px-4 md:px-6 flex items-center justify-between">
+        {/* Left */}
+        <div className="flex items-center gap-3">
           <button
             onClick={onMenuToggle}
-            className="p-2 transition-smooth lg:hidden"
-            style={{ color: '#00f0ff' }}
-            aria-label="Toggle sidebar"
+            className="p-2 rounded-lg transition-smooth hover:bg-white/5 text-white/50 hover:text-white lg:hidden"
           >
-            <Menu size={22} />
+            <Menu size={20} />
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5">
             {/* Logo */}
             <div
-              className="w-10 h-10 flex items-center justify-center relative"
-              style={{
-                border: '1px solid rgba(0, 240, 255, 0.5)',
-                background: 'rgba(0, 240, 255, 0.05)',
-                boxShadow: '0 0 15px rgba(0, 240, 255, 0.2)',
-              }}
+              className="w-8 h-8 rounded-lg flex items-center justify-center text-sm"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)' }}
             >
-              <span className="text-lg">📡</span>
-              {/* Corner brackets */}
-              <span className="absolute top-0 left-0 w-2 h-2 border-t border-l" style={{ borderColor: '#00f0ff' }} />
-              <span className="absolute bottom-0 right-0 w-2 h-2 border-b border-r" style={{ borderColor: '#00f0ff' }} />
+              📡
             </div>
-
-            <div className="hidden sm:block">
-              <div className="flex items-center gap-2">
-                <span className="text-xs opacity-50" style={{ color: '#00f0ff' }}>SYS://</span>
-                <h1
-                  className="text-lg font-bold tracking-widest uppercase"
-                  style={{
-                    fontFamily: '"Orbitron", monospace',
-                    color: '#00f0ff',
-                    textShadow: '0 0 10px rgba(0, 240, 255, 0.6)',
-                  }}
-                >
-                  SMART TRACKER
-                </h1>
-              </div>
-              <p className="text-xs tracking-widest opacity-60" style={{ color: '#00f0ff' }}>
-                GPS TRACKING SYSTEM v2.1.0
-              </p>
+            <div>
+              <p className="text-sm font-700 text-white leading-tight tracking-tight">Smart Tracker</p>
+              <p className="text-[10px] font-medium" style={{ color: 'rgba(167,139,250,0.7)' }}>GPS Dashboard</p>
             </div>
           </div>
         </div>
 
-        {/* Right side */}
-        <div className="flex items-center gap-3">
-          {/* Live indicator */}
-          <div className="hidden sm:flex items-center gap-2">
-            <div
-              className="w-2 h-2 rounded-full hud-pulse"
-              style={{ backgroundColor: '#00ff41', color: '#00ff41', boxShadow: '0 0 6px #00ff41' }}
-            />
-            <span className="text-xs tracking-widest" style={{ color: '#00ff41' }}>LIVE</span>
-          </div>
-
-          <button
-            className="p-2 transition-smooth opacity-60 hover:opacity-100"
-            style={{ color: '#00f0ff' }}
-          >
-            <HelpCircle size={18} />
+        {/* Right */}
+        <div className="flex items-center gap-1">
+          <button className="p-2 rounded-lg transition-smooth hover:bg-white/5 text-white/40 hover:text-white/70">
+            <Bell size={18} />
           </button>
-          <button
-            className="p-2 transition-smooth opacity-60 hover:opacity-100"
-            style={{ color: '#00f0ff' }}
-          >
+          <button className="p-2 rounded-lg transition-smooth hover:bg-white/5 text-white/40 hover:text-white/70">
             <Settings size={18} />
           </button>
+          {/* Avatar placeholder */}
+          <div
+            className="w-8 h-8 rounded-full ml-2 flex items-center justify-center text-xs font-bold text-white"
+            style={{ background: 'linear-gradient(135deg, #7c3aed, #2563eb)' }}
+          >
+            U
+          </div>
         </div>
       </div>
     </motion.nav>

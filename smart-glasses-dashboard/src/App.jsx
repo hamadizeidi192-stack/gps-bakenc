@@ -6,7 +6,7 @@ import NotificationContainer from './components/NotificationSystem';
 import Dashboard from './pages/Dashboard';
 import './styles/index.css';
 
-const POLL_INTERVAL = 30000; // 30 seconds
+const POLL_INTERVAL = 30000;
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -20,22 +20,18 @@ function App() {
   const [countdown, setCountdown] = useState(POLL_INTERVAL / 1000);
 
   const addNotification = (message, type = 'info') => {
-    const id = Date.now();
-    setNotifications(prev => [...prev, { id, message, type }]);
+    setNotifications(prev => [...prev, { id: Date.now(), message, type }]);
   };
+  const removeNotification = id => setNotifications(prev => prev.filter(n => n.id !== id));
 
-  const removeNotification = (id) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
-  const handleLocationUpdate = (data, isManual = false) => {
+  const handleLocationUpdate = (data) => {
     setLocationData(prev => {
-      if (data.isOnline && !prev.isOnline) addNotification('Device connected — stream active', 'success');
-      else if (!data.isOnline && prev.isOnline) addNotification('Signal lost — device offline', 'error');
+      if (data.isOnline && !prev.isOnline) addNotification('Device connected — streaming live', 'success');
+      else if (!data.isOnline && prev.isOnline) addNotification('Device went offline', 'error');
       return data;
     });
     setLoading(false);
-    if (!isManual) setCountdown(POLL_INTERVAL / 1000); // reset countdown after auto-fetch
+    setCountdown(POLL_INTERVAL / 1000);
   };
 
   const handleRefresh = async () => {
@@ -43,26 +39,24 @@ function App() {
     setCountdown(POLL_INTERVAL / 1000);
     try {
       const data = await fetchGPSLocation();
-      handleLocationUpdate(data, true);
-      if (data.isOnline) addNotification('Data stream synchronized', 'success');
+      handleLocationUpdate(data);
+      if (data.isOnline) addNotification('Data synced successfully', 'success');
       else addNotification('Device not responding', 'error');
-    } catch (error) {
+    } catch {
       addNotification('Sync failed — connection error', 'error');
       setLoading(false);
     }
   };
 
-  // Main polling effect
   useEffect(() => {
     setLoading(true);
-    fetchGPSLocation().then(data => handleLocationUpdate(data));
-    addNotification('System initialized — tracking active', 'info');
-
-    const id = startLocationPolling(data => handleLocationUpdate(data), POLL_INTERVAL);
+    fetchGPSLocation().then(handleLocationUpdate);
+    addNotification('Dashboard ready', 'info');
+    const id = startLocationPolling(handleLocationUpdate, POLL_INTERVAL);
     return () => stopLocationPolling(id);
   }, []);
 
-  // Countdown timer effect
+  // Countdown tick
   useEffect(() => {
     const tick = setInterval(() => {
       setCountdown(prev => (prev > 0 ? prev - 1 : POLL_INTERVAL / 1000));
@@ -70,49 +64,38 @@ function App() {
     return () => clearInterval(tick);
   }, []);
 
+  // Ticker data
+  const tickerItems = [
+    `LAT ${locationData.latitude?.toFixed(5) ?? '—'}`,
+    `LNG ${locationData.longitude?.toFixed(5) ?? '—'}`,
+    `BATT ${locationData.battery}%`,
+    `NET ${locationData.wifi}`,
+    `STATUS ${locationData.isOnline ? 'ONLINE' : 'OFFLINE'}`,
+    `SYNC IN ${countdown}s`,
+  ];
+  const tickerStr = [...tickerItems, ...tickerItems].join('   ·   ');
+
   return (
-    <div style={{ background: '#020810', minHeight: '100vh', position: 'relative' }}>
-      {/* Background layers */}
-      <div className="hud-grid-bg" />
-      <div className="hud-scanlines" />
-      <div className="hud-orbs">
-        <div className="hud-orb hud-orb-1" />
-        <div className="hud-orb hud-orb-2" />
-        <div className="hud-orb hud-orb-3" />
-      </div>
+    <div style={{ background: '#080c14', minHeight: '100vh', position: 'relative' }}>
+      {/* Gradient mesh background */}
+      <div className="bg-mesh" />
 
-      {/* Data stream ticker at the very bottom */}
+      {/* Bottom ticker */}
       <div
-        className="fixed bottom-0 left-0 right-0 z-50 overflow-hidden py-1"
-        style={{ borderTop: '1px solid rgba(0,240,255,0.15)', background: 'rgba(2,8,16,0.9)' }}
+        className="fixed bottom-0 left-0 right-0 z-50 ticker-track py-1.5"
+        style={{ background: 'rgba(8,12,20,0.92)', borderTop: '1px solid rgba(255,255,255,0.06)' }}
       >
-        <div className="data-stream">
-          ░░ GPS_STREAM_ACTIVE &nbsp;▸&nbsp; LAT:{locationData.latitude?.toFixed(6) ?? '---'} &nbsp;▸&nbsp;
-          LNG:{locationData.longitude?.toFixed(6) ?? '---'} &nbsp;▸&nbsp;
-          PWR:{locationData.battery}% &nbsp;▸&nbsp;
-          NET:{locationData.wifi} &nbsp;▸&nbsp;
-          STATUS:{locationData.isOnline ? 'ONLINE' : 'OFFLINE'} &nbsp;▸&nbsp;
-          NEXT_SYNC:{countdown}s &nbsp;▸&nbsp;
-          ENC:AES-256 &nbsp;▸&nbsp; SIG:STRONG &nbsp;▸&nbsp; VER:2.1.0 &nbsp;▸&nbsp;
-          ░░ GPS_STREAM_ACTIVE &nbsp;▸&nbsp; LAT:{locationData.latitude?.toFixed(6) ?? '---'} &nbsp;▸&nbsp;
-          LNG:{locationData.longitude?.toFixed(6) ?? '---'} &nbsp;▸&nbsp;
-          PWR:{locationData.battery}% &nbsp;▸&nbsp;
-          NET:{locationData.wifi} &nbsp;▸&nbsp;
-          STATUS:{locationData.isOnline ? 'ONLINE' : 'OFFLINE'} &nbsp;▸&nbsp;
-          NEXT_SYNC:{countdown}s &nbsp;▸&nbsp;
-          ENC:AES-256 &nbsp;▸&nbsp; SIG:STRONG &nbsp;▸&nbsp; VER:2.1.0 &nbsp;░░
-        </div>
+        <div className="ticker-content">{tickerStr}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{tickerStr}</div>
       </div>
 
-      <Navbar onMenuToggle={() => setSidebarOpen(!sidebarOpen)} isSidebarOpen={sidebarOpen} />
+      <Navbar onMenuToggle={() => setSidebarOpen(o => !o)} isSidebarOpen={sidebarOpen} />
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} isOnline={locationData.isOnline} />
 
-      <main className="lg:ml-64 pb-10">
+      <main className="lg:ml-56">
         <Dashboard
           locationData={locationData}
           loading={loading}
           onRefresh={handleRefresh}
-          onNotification={addNotification}
           isOnline={locationData.isOnline}
           countdown={countdown}
           pollInterval={POLL_INTERVAL / 1000}

@@ -3,83 +3,67 @@ import { formatLocationData } from '../services/api';
 import MapComponent from '../components/MapComponent';
 import { StatusCardsGrid } from '../components/StatusCard';
 import { motion } from 'framer-motion';
-import { RefreshCw, Activity, Zap, Wifi, Clock, Shield } from 'lucide-react';
+import { RefreshCw, Activity, Wifi, Clock, Battery, TrendingUp } from 'lucide-react';
 
-// ─── Countdown Ring SVG ───────────────────────────────────────────────────────
+// ─── Countdown Ring ───────────────────────────────────────────────────────────
 const CountdownRing = ({ countdown, total }) => {
-  const size = 72;
+  const size = 64;
   const stroke = 3;
-  const radius = (size - stroke * 2) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const progress = countdown / total;
-  const offset = circumference - progress * circumference;
-  const color = countdown > 15 ? '#00f0ff' : countdown > 8 ? '#ff9a00' : '#ff003c';
+  const r = (size - stroke * 2) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (countdown / total) * circ;
+  const pct = Math.round((countdown / total) * 100);
+  const color = countdown > total * 0.5 ? '#a78bfa' : countdown > total * 0.25 ? '#fb923c' : '#f87171';
 
   return (
     <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
-      <svg className="countdown-ring absolute" width={size} height={size}>
-        {/* Track */}
+      <svg className="absolute" width={size} height={size} style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx={size / 2} cy={size / 2} r={r} stroke="rgba(255,255,255,0.06)" strokeWidth={stroke} fill="none" />
         <circle
-          cx={size / 2} cy={size / 2} r={radius}
-          stroke="rgba(0,240,255,0.08)" strokeWidth={stroke} fill="none"
-        />
-        {/* Progress */}
-        <circle
-          cx={size / 2} cy={size / 2} r={radius}
+          cx={size / 2} cy={size / 2} r={r}
           stroke={color} strokeWidth={stroke} fill="none"
-          strokeDasharray={circumference}
+          strokeLinecap="round"
+          strokeDasharray={circ}
           strokeDashoffset={offset}
-          style={{ filter: `drop-shadow(0 0 6px ${color})`, transition: 'stroke-dashoffset 1s linear, stroke 0.3s' }}
+          style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.4s ease' }}
         />
       </svg>
-      {/* Center text */}
       <div className="text-center z-10">
-        <p
-          className="text-lg font-black leading-none"
-          style={{ fontFamily: '"Orbitron", monospace', color, textShadow: `0 0 10px ${color}` }}
-        >
-          {countdown}
-        </p>
-        <p className="text-[8px] tracking-widest opacity-60" style={{ color }}>SEC</p>
+        <p className="text-lg font-bold text-white leading-none">{countdown}</p>
+        <p className="text-[9px] text-white/30 font-medium">SEC</p>
       </div>
     </div>
   );
 };
 
-// ─── Battery Bar ──────────────────────────────────────────────────────────────
-const BatteryBar = ({ level }) => {
-  const color = level > 50 ? '#00ff41' : level > 20 ? '#ff9a00' : '#ff003c';
-  const segments = 10;
-  const filled = Math.round((level / 100) * segments);
+// ─── Battery bar ──────────────────────────────────────────────────────────────
+const BatteryIndicator = ({ level }) => {
+  const color = level > 50 ? '#34d399' : level > 20 ? '#fb923c' : '#f87171';
+  const bg = level > 50 ? 'rgba(52,211,153,0.12)' : level > 20 ? 'rgba(251,146,60,0.12)' : 'rgba(248,113,113,0.12)';
   return (
     <div>
-      <div className="flex items-center gap-2 mb-1.5">
-        <div className="flex gap-1">
-          {Array.from({ length: segments }).map((_, i) => (
-            <div
-              key={i}
-              className="transition-all duration-300"
-              style={{
-                width: '12px', height: '18px',
-                background: i < filled ? color : 'rgba(255,255,255,0.06)',
-                border: `1px solid ${i < filled ? color : 'rgba(255,255,255,0.1)'}`,
-                boxShadow: i < filled ? `0 0 6px ${color}` : 'none',
-              }}
-            />
-          ))}
-        </div>
-        {/* Battery cap */}
-        <div style={{ width: 4, height: 10, background: 'rgba(255,255,255,0.2)', borderRadius: '0 2px 2px 0' }} />
+      <div className="flex items-center justify-between mb-2">
+        <span className="text-xs text-white/40 font-medium">Battery</span>
+        <span className="text-xs font-bold" style={{ color }}>{level}%</span>
       </div>
-      <p className="text-xs tracking-widest" style={{ color, textShadow: `0 0 8px ${color}` }}>
-        {level}% POWER
-      </p>
+      <div className="progress-track">
+        <motion.div
+          className="progress-fill"
+          initial={{ width: 0 }}
+          animate={{ width: `${level}%` }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            background: `linear-gradient(to right, ${color}99, ${color})`,
+            boxShadow: `0 0 8px ${color}40`,
+          }}
+        />
+      </div>
     </div>
   );
 };
 
-// ─── Main Dashboard ───────────────────────────────────────────────────────────
-export const Dashboard = ({ locationData, loading, onRefresh, onNotification, isOnline, countdown = 30, pollInterval = 30 }) => {
+// ─── Dashboard ────────────────────────────────────────────────────────────────
+export const Dashboard = ({ locationData, loading, onRefresh, isOnline, countdown = 30, pollInterval = 30 }) => {
   const mapRef = useRef(null);
   const formattedData = formatLocationData(locationData);
 
@@ -90,97 +74,62 @@ export const Dashboard = ({ locationData, loading, onRefresh, onNotification, is
   };
 
   return (
-    <div className="pt-20 pb-16">
-      <div className="max-w-7xl mx-auto px-4 md:px-6">
+    <div className="pt-20 pb-16 min-h-screen">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 py-6">
 
-        {/* ── HERO HEADER ─────────────────────────────────────────────────── */}
+        {/* ── Header ──────────────────────────────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: -30 }}
+          initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="mb-6 pt-4"
+          transition={{ duration: 0.5 }}
+          className="mb-7"
         >
-          {/* Breadcrumb */}
-          <p className="text-xs tracking-[0.3em] opacity-40 mb-3" style={{ color: '#00f0ff' }}>
-            SYS:// &gt; GPS_CONSOLE &gt; LIVE_TRACKING
-          </p>
-
-          <div className="flex flex-col lg:flex-row lg:items-center gap-6 justify-between">
-            {/* Title block */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <div className="flex items-center gap-3 mb-1">
-                <div className="relative">
-                  {isOnline && (
-                    <>
-                      <div className="radar-ring" style={{ width: 12, height: 12, top: '50%', left: '50%', marginTop: -6, marginLeft: -6, animationDelay: '0s' }} />
-                      <div className="radar-ring" style={{ width: 12, height: 12, top: '50%', left: '50%', marginTop: -6, marginLeft: -6, animationDelay: '0.8s' }} />
-                    </>
-                  )}
-                  <div
-                    className="w-3 h-3 rounded-full relative z-10"
-                    style={{
-                      background: isOnline ? '#00ff41' : '#ff003c',
-                      boxShadow: `0 0 12px ${isOnline ? '#00ff41' : '#ff003c'}`,
-                    }}
-                  />
-                </div>
-                <span className="text-xs tracking-[0.25em]" style={{ color: isOnline ? '#00ff41' : '#ff003c' }}>
-                  {isOnline ? 'SIGNAL ACQUIRED' : 'NO SIGNAL'}
+              <div className="flex items-center gap-2.5 mb-1.5">
+                <span className={`status-dot ${isOnline ? 'online' : 'offline'}`} />
+                <span className="text-xs font-semibold" style={{ color: isOnline ? '#34d399' : '#f87171' }}>
+                  {isOnline ? 'Live Tracking Active' : 'Device Offline'}
                 </span>
               </div>
-
-              <h1
-                className="text-3xl md:text-5xl font-black tracking-[0.12em] uppercase leading-none"
-                style={{
-                  fontFamily: '"Orbitron", monospace',
-                  color: '#00f0ff',
-                  textShadow: '0 0 30px rgba(0,240,255,0.5), 0 0 60px rgba(0,240,255,0.15)',
-                }}
-              >
-                GPS CONSOLE
+              <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
+                GPS Dashboard
               </h1>
-              <p className="text-xs tracking-[0.3em] opacity-40 mt-2" style={{ color: '#00f0ff' }}>
-                // REAL-TIME LOCATION &amp; TELEMETRY MONITORING
+              <p className="text-sm text-white/40 mt-1">
+                Real-time location &amp; telemetry for your smart glasses
               </p>
             </div>
 
-            {/* Right side controls */}
-            <div className="flex items-center gap-4 flex-wrap">
-              {/* Countdown ring */}
+            <div className="flex items-center gap-3">
+              {/* Countdown */}
               <div
-                className="flex flex-col items-center gap-1 p-3"
-                style={{ border: '1px solid rgba(0,240,255,0.15)', background: 'rgba(0,10,20,0.5)' }}
+                className="flex items-center gap-3 px-4 py-3 rounded-2xl"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
               >
-                <p className="text-[9px] tracking-widest opacity-40 mb-1" style={{ color: '#00f0ff' }}>NEXT SYNC</p>
                 <CountdownRing countdown={countdown} total={pollInterval} />
+                <div>
+                  <p className="text-[10px] text-white/30 font-medium mb-0.5">NEXT SYNC</p>
+                  <p className="text-xs text-white/60 font-semibold">Every {pollInterval}s</p>
+                </div>
               </div>
 
-              {/* Sync button */}
-              <button
-                onClick={onRefresh}
-                disabled={loading}
-                className="btn-primary flex items-center gap-2"
-              >
-                <RefreshCw size={14} className={loading ? 'animate-spin' : ''} />
-                {loading ? 'SYNCING...' : 'FORCE SYNC'}
+              {/* Refresh */}
+              <button onClick={onRefresh} disabled={loading} className="btn-primary">
+                <RefreshCw size={15} className={loading ? 'animate-spin' : ''} />
+                {loading ? 'Syncing…' : 'Sync Now'}
               </button>
             </div>
           </div>
 
-          {/* Divider with glow */}
-          <div className="mt-5 flex items-center gap-3">
-            <div className="h-px flex-1" style={{ background: 'linear-gradient(to right, rgba(0,240,255,0.5), rgba(0,240,255,0.05))' }} />
-            <span className="text-xs opacity-30" style={{ color: '#00f0ff' }}>◈</span>
-            <div className="h-px w-16" style={{ background: 'rgba(0,240,255,0.08)' }} />
-          </div>
+          {/* Divider */}
+          <div className="mt-5 h-px" style={{ background: 'rgba(255,255,255,0.06)' }} />
         </motion.div>
 
-        {/* ── STATUS CARDS GRID ────────────────────────────────────────────── */}
+        {/* ── Stat Cards ───────────────────────────────────────────────────── */}
         <StatusCardsGrid data={formattedData} loading={loading} />
 
-        {/* ── MAP + SIDE PANEL ─────────────────────────────────────────────── */}
+        {/* ── Map + Side Panel ─────────────────────────────────────────────── */}
         <div className="flex flex-col xl:flex-row gap-4 mb-4">
-          {/* Map takes most of the space */}
           <div className="flex-1 min-w-0">
             <MapComponent
               latitude={locationData.latitude}
@@ -192,109 +141,108 @@ export const Dashboard = ({ locationData, loading, onRefresh, onNotification, is
             />
           </div>
 
-          {/* Side telemetry panel */}
+          {/* Side panel */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
+            initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="xl:w-64 flex flex-col gap-4"
+            className="xl:w-60 flex flex-col gap-3"
           >
-            {/* Connection status block */}
+            {/* Connection */}
             <div
-              className="hud-card p-5"
-              style={isOnline ? { borderColor: 'rgba(0,255,65,0.3)' } : { borderColor: 'rgba(255,0,60,0.3)' }}
+              className="card p-4"
+              style={{ borderColor: isOnline ? 'rgba(52,211,153,0.15)' : 'rgba(248,113,113,0.15)' }}
             >
-              <p className="text-[10px] tracking-[0.3em] opacity-50 mb-3" style={{ color: '#00f0ff' }}>LINK STATUS</p>
-              <div className="flex items-center gap-3 mb-3">
-                <div
-                  className="w-3 h-3 rounded-full animate-pulse-slow"
-                  style={{
-                    background: isOnline ? '#00ff41' : '#ff003c',
-                    color: isOnline ? '#00ff41' : '#ff003c',
-                    boxShadow: `0 0 10px ${isOnline ? '#00ff41' : '#ff003c'}`,
-                  }}
-                />
-                <span
-                  className="text-sm font-bold tracking-widest"
-                  style={{
-                    fontFamily: '"Orbitron", monospace',
-                    color: isOnline ? '#00ff41' : '#ff003c',
-                    textShadow: `0 0 8px ${isOnline ? '#00ff41' : '#ff003c'}`,
-                  }}
-                >
-                  {isOnline ? 'ONLINE' : 'OFFLINE'}
-                </span>
+              <div className="flex items-center gap-2 mb-2">
+                <Activity size={14} style={{ color: isOnline ? '#34d399' : '#f87171' }} />
+                <p className="text-xs font-semibold text-white/50">Connection</p>
               </div>
-              <p className="text-xs opacity-40 tracking-widest" style={{ color: '#00f0ff' }}>
-                {isOnline ? '// Telemetry active' : '// Signal lost'}
+              <div className="flex items-center gap-2">
+                <span className={`status-dot ${isOnline ? 'online' : 'offline'}`} />
+                <span className="font-bold text-sm text-white">{isOnline ? 'Online' : 'Offline'}</span>
+              </div>
+              <p className="text-xs text-white/30 mt-1.5">
+                {isOnline ? 'Streaming telemetry data' : 'Awaiting reconnect…'}
               </p>
             </div>
 
-            {/* Battery segmented bar */}
-            <div className="hud-card p-5">
-              <p className="text-[10px] tracking-[0.3em] opacity-50 mb-3" style={{ color: '#00f0ff' }}>POWER</p>
-              <BatteryBar level={formattedData.battery} />
+            {/* Battery */}
+            <div className="card p-4">
+              <div className="flex items-center gap-2 mb-3">
+                <Battery size={14} className="text-white/40" />
+                <p className="text-xs font-semibold text-white/50">Power Level</p>
+              </div>
+              <BatteryIndicator level={formattedData.battery} />
             </div>
 
             {/* Network */}
-            <div className="hud-card p-5">
-              <p className="text-[10px] tracking-[0.3em] opacity-50 mb-2" style={{ color: '#00f0ff' }}>NETWORK</p>
-              <div className="flex items-center gap-2">
-                <Wifi size={14} style={{ color: '#ff9a00' }} />
-                <span
-                  className="text-sm font-bold tracking-widest"
-                  style={{ fontFamily: '"Orbitron", monospace', color: '#ff9a00', textShadow: '0 0 8px #ff9a00' }}
-                >
-                  {formattedData.wifi}
-                </span>
+            <div className="card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Wifi size={14} className="text-white/40" />
+                <p className="text-xs font-semibold text-white/50">Network</p>
               </div>
+              <p className="text-sm font-bold text-white">{formattedData.wifi || '—'}</p>
+              <span className={`pill mt-2 ${formattedData.wifi === 'Disconnected' ? 'pill-red' : 'pill-green'}`}>
+                {formattedData.wifi === 'Disconnected' ? 'Disconnected' : 'Connected'}
+              </span>
             </div>
 
             {/* Last sync */}
-            <div className="hud-card p-5">
-              <p className="text-[10px] tracking-[0.3em] opacity-50 mb-2" style={{ color: '#00f0ff' }}>LAST SYNC</p>
-              <div className="flex items-center gap-2">
-                <Clock size={14} style={{ color: '#00f0ff' }} />
-                <span className="text-xs tracking-wide opacity-80" style={{ color: '#00f0ff' }}>
-                  {formattedData.lastUpdate || 'NEVER'}
-                </span>
+            <div className="card p-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Clock size={14} className="text-white/40" />
+                <p className="text-xs font-semibold text-white/50">Last Sync</p>
               </div>
+              <p className="text-xs font-mono text-white/70">{formattedData.lastUpdate || 'Never'}</p>
             </div>
           </motion.div>
         </div>
 
-        {/* ── SYSTEM LOG ───────────────────────────────────────────────────── */}
+        {/* ── Info cards row ───────────────────────────────────────────────── */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="hud-card p-5"
+          transition={{ duration: 0.5, delay: 0.35 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-3"
         >
-          <div className="flex items-center gap-3 mb-4">
-            <Shield size={14} style={{ color: '#00f0ff', opacity: 0.6 }} />
-            <p className="text-xs tracking-[0.3em] opacity-50" style={{ color: '#00f0ff' }}>SYSTEM_LOG</p>
-            <div className="h-px flex-1 opacity-10" style={{ background: '#00f0ff' }} />
-            <span className="text-[9px] tracking-widest opacity-30" style={{ color: '#00ff41' }}>● ACTIVE</span>
+          {/* System info */}
+          <div className="card p-5 md:col-span-2">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp size={15} className="text-white/30" />
+              <p className="text-xs font-semibold text-white/40 uppercase tracking-wider">System Info</p>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              {[
+                { label: 'Sync Interval',  value: `${pollInterval}s` },
+                { label: 'Backend',        value: 'Render Cloud' },
+                { label: 'Encryption',     value: 'AES-256' },
+                { label: 'Protocol',       value: 'HTTPS/REST' },
+              ].map(item => (
+                <div key={item.label}>
+                  <p className="text-[10px] text-white/30 font-medium mb-0.5 uppercase tracking-wider">{item.label}</p>
+                  <p className="text-sm font-semibold text-white/70">{item.value}</p>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {[
-              { level: 'INFO', msg: `Data sync interval: ${pollInterval}s` },
-              { level: 'INFO', msg: 'GPS accuracy improves in open environments' },
-              { level: 'WARN', msg: 'Monitor POWER_LVL — ensure device charging' },
-              { level: 'INFO', msg: 'Ensure stable WiFi for continuous tracking' },
-              { level: 'INFO', msg: 'AES-256 encryption active on all streams' },
-              { level: 'SYS',  msg: 'Backend: gps-bakenc.onrender.com — OK' },
-            ].map((log, i) => (
-              <p
-                key={i}
-                className="text-xs font-mono opacity-50 hover:opacity-80 transition-smooth tracking-wide"
-                style={{
-                  color: log.level === 'WARN' ? '#ff9a00' : log.level === 'SYS' ? '#00ff41' : '#00f0ff',
-                }}
-              >
-                [{log.level}] {log.msg}
-              </p>
-            ))}
+
+          {/* Tips */}
+          <div
+            className="card-accent p-5"
+          >
+            <p className="text-xs font-semibold text-white/40 uppercase tracking-wider mb-3">💡 Tips</p>
+            <ul className="space-y-2.5">
+              {[
+                'GPS is more accurate outdoors',
+                'Keep battery above 20%',
+                'Stable WiFi improves sync',
+              ].map(tip => (
+                <li key={tip} className="flex items-start gap-2 text-xs text-white/50">
+                  <span style={{ color: '#a78bfa', marginTop: 2 }}>•</span>
+                  {tip}
+                </li>
+              ))}
+            </ul>
           </div>
         </motion.div>
 
