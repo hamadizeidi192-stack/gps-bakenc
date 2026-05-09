@@ -72,11 +72,8 @@ export const fetchGPSLocation = async () => {
  * @param {number} interval - Polling interval in milliseconds (default: 5000ms)
  * @returns {number} Interval ID for clearing the interval later
  */
-export const startLocationPolling = (callback, interval = 5000) => {
-  // Fetch immediately on start
+export const startLocationPolling = (callback, interval = 30000) => {
   fetchGPSLocation().then(callback);
-
-  // Then set up polling
   return setInterval(() => {
     fetchGPSLocation().then(callback);
   }, interval);
