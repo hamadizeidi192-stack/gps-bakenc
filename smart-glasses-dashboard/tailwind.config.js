@@ -7,9 +7,19 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ['Outfit', 'sans-serif'],
+        sans: ['"Share Tech Mono"', 'monospace'],
+        mono: ['"VT323"', 'monospace'],
       },
       colors: {
+        hud: {
+          bg: '#050a0f',
+          cyan: '#00f0ff',
+          cyanDim: 'rgba(0, 240, 255, 0.2)',
+          orange: '#ff9a00',
+          orangeDim: 'rgba(255, 154, 0, 0.2)',
+          red: '#ff003c',
+          green: '#00ff41',
+        },
         dark: {
           50: '#f9fafb',
           100: '#f3f4f6',

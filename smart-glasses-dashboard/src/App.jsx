@@ -105,7 +105,7 @@ function App() {
   };
 
   return (
-    <div className="bg-dark-950 min-h-screen">
+    <div style={{ background: '#050a0f', minHeight: '100vh' }}>
       {/* Navigation */}
       <Navbar onMenuToggle={toggleSidebar} isSidebarOpen={sidebarOpen} />
 
